@@ -9,12 +9,15 @@ React, TypeScript, Solidity, Ethers.js, Hardhat
 ```
 npm install --save-dev hardhat
 npm install --save-dev @nomicfoundation/hardhat-toolbox
+npm install --save-dev ts-node typescript
+npm install --save-dev chai@4 @types/node @types/mocha @types/chai@4
 ```
 
 ### Frontend:
 
 ```
 npm install ethers
+
 ```
 
 ## File Tree
