@@ -11,3 +11,15 @@ REPORT_GAS=true npx hardhat test
 npx hardhat node
 npx hardhat ignition deploy ./ignition/modules/Lock.ts
 ```
+
+## Launch node
+
+```
+npx hardhat node
+```
+
+## Deploy Chain's End (optional '--reset')
+
+```
+npx hardhat ignition deploy ignition/modules/ChainsEnd.ts --network localhost --reset
+```
