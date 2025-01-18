@@ -22,42 +22,54 @@ npm install ethers
 
 ## File Tree
 
+```
 chains-end/
 ├── backend/
-│ ├── .gitignore
-│ ├── contracts/
-│ │ └── Lock.sol
-│ ├── hardhat.config.ts
-│ ├── ignition/
-│ │ └── modules/
-│ │ └── Lock.ts
-│ ├─] node_modules/ (ignored)
-│ ├── package-lock.json
-│ ├── package.json
-│ ├── README.md
-│ ├── test/
-│ │ └── Lock.ts
-│ └── tsconfig.json
+│   ├── .gitignore
+│   ├─] artifacts/ (ignored)
+│   ├─] cache/ (ignored)
+│   ├── contracts/
+│   │   └── GameState.sol
+│   ├── hardhat.config.ts
+│   ├── ignition/
+│   │   ├── deployments/
+│   │   │   └─] chain-31337/ (ignored)
+│   │   └── modules/
+│   │       └── ChainsEnd.ts
+│   ├─] node_modules/ (ignored)
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── README.md
+│   ├── test/
+│   │   └── Lock.ts
+│   ├── tsconfig.json
+│   └─] typechain-types/ (ignored)
 ├── frontend/
-│ ├── .gitignore
-│ ├── eslint.config.js
-│ ├── index.html
-│ ├─] node_modules/ (ignored)
-│ ├── package-lock.json
-│ ├── package.json
-│ ├── public/
-│ │ ├── background.png
-│ │ └── favicon.ico
-│ ├── src/
-│ │ ├── App.css
-│ │ ├── App.tsx
-│ │ ├── assets/
-│ │ │ └── react.svg
-│ │ ├── index.css
-│ │ ├── main.tsx
-│ │ └── vite-env.d.ts
-│ ├── tsconfig.app.json
-│ ├── tsconfig.json
-│ ├── tsconfig.node.json
-│ └── vite.config.ts
+│   ├── .gitignore
+│   ├── eslint.config.js
+│   ├── index.html
+│   ├─] node_modules/ (ignored)
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── public/
+│   │   ├── background.png
+│   │   └── favicon.ico
+│   ├── src/
+│   │   ├── App.css
+│   │   ├── App.tsx
+│   │   ├── assets/
+│   │   │   └── react.svg
+│   │   ├── components/
+│   │   │   └── ConnectWallet.tsx
+│   │   ├── contracts/
+│   │   │   └── ChainsEnd#GameState.json
+│   │   ├── global.d.ts
+│   │   ├── index.css
+│   │   ├── main.tsx
+│   │   └── vite-env.d.ts
+│   ├── tsconfig.app.json
+│   ├── tsconfig.json
+│   ├── tsconfig.node.json
+│   └── vite.config.ts
 └── README.md
+```
