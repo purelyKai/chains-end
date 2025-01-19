@@ -114,7 +114,7 @@ contract GameStateManager {
     // Check if the player already owns the item
     uint256[] storage ownedItems = playerItems[msg.sender];
     for (uint256 i = 0; i < ownedItems.length; i++) {
-      require(ownedItems[i] != _itemId, "Item already owned");
+      require(ownedItems[i+1] != _itemId, "Item already owned");
     }
 
     // Deduct the item's price from the player's coins
