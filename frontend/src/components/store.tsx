@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
-import { getPlayerCoins, getAllStoreItems } from "../contracts/gameState";
+import {
+  getPlayerCoins,
+  getAllStoreItems,
+  purchaseItem,
+  getPlayerItems,
+} from "../contracts/gameState";
 
 interface StoreProps {
   onClose: () => void;
@@ -13,26 +18,35 @@ interface StoreItem {
   image: string;
 }
 
-/*
-const accounts = await window.ethereum.request({
-  method: "eth_requestAccounts",
-});
-const address = accounts[0];
-*/
-
 const Store = ({ onClose }: StoreProps) => {
   const [selectedItem, setSelectedItem] = useState<StoreItem | null>(null);
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const [gameMessage, setGameMessage] = useState<string | null>(null);
   const [purchasedItems, setPurchasedItems] = useState<number[]>([]); // Track purchased item IDs
   const [allStoreItems, setAllStoreItems] = useState<StoreItem[]>([]);
+  const [userAddress, setUserAddress] = useState<string>("");
 
-  // Fetch wallet balance when the component mounts
+  const fetchAddress = async () => {
+    const accounts = await window.ethereum.request({
+      method: "eth_requestAccounts",
+    });
+    const address = accounts[0];
+    setUserAddress(address);
+  };
+  fetchAddress();
+
+  const fetchAllStoreItems = async () => {
+    const allItems = await getAllStoreItems();
+    setAllStoreItems(allItems);
+  };
+
+  const fetchPlayerItems = async () => {
+    const userItems = await getPlayerItems(userAddress);
+    setPurchasedItems(userItems);
+  };
+
+  // Fetch store items and wallet balance when the component mounts
   useEffect(() => {
-    const fetchAllStoreItems = async () => {
-      const allItems = await getAllStoreItems();
-      setAllStoreItems(allItems);
-    };
     const fetchBalance = async () => {
       const balance = await getPlayerCoins();
       setWalletBalance(balance);
@@ -40,11 +54,17 @@ const Store = ({ onClose }: StoreProps) => {
 
     fetchBalance();
     fetchAllStoreItems();
+    fetchPlayerItems();
   }, []);
 
   useEffect(() => {
+    fetchAllStoreItems();
+    fetchPlayerItems();
+  }, [walletBalance]);
+
+  useEffect(() => {
     if (gameMessage) {
-      const timer = setTimeout(() => setGameMessage(null), 3000); // 3 seconds
+      const timer = setTimeout(() => setGameMessage(null), 2000); // 2   seconds
       return () => clearTimeout(timer);
     }
   }, [gameMessage]);
@@ -56,17 +76,16 @@ const Store = ({ onClose }: StoreProps) => {
       return;
     }
 
+    await purchaseItem(item.id);
+
     // Simulate purchase and update wallet balance
     const newBalance = walletBalance - item.price;
     setWalletBalance(newBalance);
 
-    // Mark item as purchased
-    setPurchasedItems((prev) => [...prev, item.id]);
-
     // Set success message
     setGameMessage(`Successfully purchased ${item.name}!`);
 
-    // Close the modal after 3 seconds
+    // Close the modal after 0.5 seconds
     setTimeout(() => {
       setSelectedItem(null); // Close the modal
     }, 500);
