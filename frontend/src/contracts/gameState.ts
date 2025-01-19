@@ -253,7 +253,7 @@ export async function getAllStoreItems() {
   }
 }
 
-export async function buyItem(itemId: number) {
+export async function purchaseItem(itemId: number) {
   try {
     const contract = gameStateContract;
     const tx = await contract.purchaseItem(itemId);
@@ -268,14 +268,8 @@ export async function buyItem(itemId: number) {
 export async function getPlayerItems(playerAddress: string) {
   try {
     const contract = gameStateContract;
-    const playerItems = await contract.getPlayerItems(playerAddress);
-    return playerItems.map((item: any) => ({
-      id: Number(item.id),
-      name: item.name,
-      price: Number(item.price),
-      description: item.description,
-      image: item.image,
-    }));
+    const ownedItemIds = await contract.getPlayerItems(playerAddress);
+    return ownedItemIds;
   } catch (error) {
     console.error("Error getting player items", error);
     throw error;
