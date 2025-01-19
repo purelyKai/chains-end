@@ -1,75 +1,22 @@
 # chains-end
 
+A lore driven 2d pixel art side scroller built on the Ethereum blockchain. 
+
 ## Tech, Libs, & Frameworks
 
-React, TypeScript, Solidity, Ethers.js, Hardhat
+Web: React, TypeScript
+
+Smart contracts: Solidity, Ethers.js, Hardhat
+
+Game engine: Phaser
 
 ### Backend:
 
-```
-npm install --save-dev hardhat
-npm install --save-dev @nomicfoundation/hardhat-toolbox
-npm install --save-dev ts-node typescript
-npm install --save-dev chai@4 @types/node @types/mocha @types/chai@4
-```
+Follow the README.md in ``/backend``
 
 ### Frontend:
 
-```
-npm install ethers
+Follow the README.md in ``/frontend``
 
-```
-
-## File Tree
-
-```
-chains-end/
-├── backend/
-│   ├── .gitignore
-│   ├─] artifacts/ (ignored)
-│   ├─] cache/ (ignored)
-│   ├── contracts/
-│   │   └── GameState.sol
-│   ├── hardhat.config.ts
-│   ├── ignition/
-│   │   ├── deployments/
-│   │   │   └─] chain-31337/ (ignored)
-│   │   └── modules/
-│   │       └── ChainsEnd.ts
-│   ├─] node_modules/ (ignored)
-│   ├── package-lock.json
-│   ├── package.json
-│   ├── README.md
-│   ├── test/
-│   │   └── Lock.ts
-│   ├── tsconfig.json
-│   └─] typechain-types/ (ignored)
-├── frontend/
-│   ├── .gitignore
-│   ├── eslint.config.js
-│   ├── index.html
-│   ├─] node_modules/ (ignored)
-│   ├── package-lock.json
-│   ├── package.json
-│   ├── public/
-│   │   ├── background.png
-│   │   └── favicon.ico
-│   ├── src/
-│   │   ├── App.css
-│   │   ├── App.tsx
-│   │   ├── assets/
-│   │   │   └── react.svg
-│   │   ├── components/
-│   │   │   └── ConnectWallet.tsx
-│   │   ├── contracts/
-│   │   │   └── ChainsEnd#GameState.json
-│   │   ├── global.d.ts
-│   │   ├── index.css
-│   │   ├── main.tsx
-│   │   └── vite-env.d.ts
-│   ├── tsconfig.app.json
-│   ├── tsconfig.json
-│   ├── tsconfig.node.json
-│   └── vite.config.ts
-└── README.md
-```
+<hr />
+Submitted to QuackHacks 2025
