@@ -262,17 +262,11 @@ contract GameStateManager {
     return mobs[_mobId];
   }
 
-  function updateMobHealth(uint256 _mobId, uint256 _damage) public {
+  function killMob(uint256 _mobId) public {
     require(mobs[_mobId].exists, "Mob does not exist");
     require(!mobs[_mobId].isDead, "Mob is already dead");
 
-    // Ensure damage doesn't reduce health below 0
-    if (_damage >= mobs[_mobId].health) {
-      mobs[_mobId].health = 0;
-      mobs[_mobId].isDead = true;
-    } else {
-      mobs[_mobId].health -= _damage;
-    }
+    mobs[_mobId].isDead = true;
 
     if (mobs[_mobId].isDead) {
       dropCoins(_mobId);

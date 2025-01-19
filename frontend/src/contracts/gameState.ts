@@ -27,6 +27,15 @@ export type MobData = {
   isDead: boolean
 }
 
+export type PlayerData = {
+  stage: number
+  level: number
+  experience: number
+  health: number
+  createdAt: Date
+  exists: boolean
+}
+
 export async function createPlayer() {
   try {
     // Get contract instance
@@ -196,17 +205,18 @@ export async function createMob(name: string) {
   }
 }
 
-export async function updateMobHealth(mobId: number, damage: number) {
+export async function killMob(id: string) {
   try {
     const contract = gameStateContract;
 
-    const tx = await contract.updateMobHealth(mobId, damage);
+    const tx = await contract.killMob(id);
 
     const receipt = await tx.wait();
 
-    return receipt;
+    console.log(receipt);
+
   } catch (error) {
-    console.error("Error updating mob health", error);
+    console.error("Error killing mob:", error);
     throw error;
   }
 }
