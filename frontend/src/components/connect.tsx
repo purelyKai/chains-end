@@ -1,80 +1,55 @@
 import { useState } from "react";
 import { formatEther } from "ethers/utils";
 
-// Define the types for the state
-interface WalletData {
-  address: string;
-  balance: string | null;
-}
-
 interface ConnectWalletProps {
-  onWalletConnect: (address: string) => void;
+  onWalletConnect: (address: string, balance: string) => void;
 }
 
 const ConnectWallet = ({ onWalletConnect }: ConnectWalletProps) => {
-  // useState for storing and retrieving wallet details
-  const [data, setData] = useState<WalletData>({
-    address: "",
-    balance: null,
-  });
+  const [isConnecting, setIsConnecting] = useState(false);
 
-  // Button handler for handling a request event for MetaMask
-  const btnHandler = () => {
+  const connectWallet = async () => {
+    setIsConnecting(true);
     if (window.ethereum) {
-      // Requesting accounts from MetaMask
-      window.ethereum
-        .request({ method: "eth_requestAccounts" })
-        .then((res: string[]) => accountChangeHandler(res[0]));
-    } else {
-      alert("Install MetaMask extension!");
-    }
-  };
-
-  // Get balance function for fetching balance with ethers.js
-  const getBalance = (address: string) => {
-    window.ethereum
-      .request({
-        method: "eth_getBalance",
-        params: [address, "latest"],
-      })
-      .then((balance: string) => {
-        setData({
-          address,
-          balance: formatEther(balance),
+      try {
+        const accounts = await window.ethereum.request({
+          method: "eth_requestAccounts",
         });
-      });
-  };
-
-  // Handle account changes
-  const accountChangeHandler = (account: string) => {
-    setData({
-      address: account,
-      balance: null, // Reset balance while waiting for it to load
-    });
-
-    onWalletConnect(account); // Pass wallet address to parent component
-    getBalance(account);
+        const address = accounts[0];
+        const balanceWei = await window.ethereum.request({
+          method: "eth_getBalance",
+          params: [address, "latest"],
+        });
+        const balanceEth = formatEther(balanceWei);
+        onWalletConnect(address, balanceEth);
+      } catch (error) {
+        console.error("Failed to connect wallet:", error);
+        alert("Failed to connect wallet. Please try again.");
+      }
+    } else {
+      alert("Please install MetaMask to access the Crypto Dungeon!");
+    }
+    setIsConnecting(false);
   };
 
   return (
-    <div className="connect-wallet-container">
-      <div className="wallet-card">
-        <div className="wallet-header">
-          <strong>Address: </strong>
-          {data.address || "Not connected"}
-        </div>
-        <div className="wallet-body">
-          <p>
-            <strong>Balance: </strong>
-            {data.balance !== null ? data.balance : "Loading..."}
-          </p>
-          <button onClick={btnHandler} className="connect-btn">
-            Connect Wallet
-          </button>
-        </div>
-      </div>
+    <div className="bg-gray-800 bg-opacity-80 backdrop-blur-md rounded-xl p-6 w-full max-w-md mx-auto text-center">
+      <h2 className="text-2xl font-bold text-yellow-500 mb-4">
+        Connect Your Crypto Wallet
+      </h2>
+      <p className="text-gray-300 mb-6">
+        To embark on your journey through the Blockchain Dungeon, you must first
+        connect your magical wallet.
+      </p>
+      <button
+        onClick={connectWallet}
+        disabled={isConnecting}
+        className="w-full py-3 px-4 bg-yellow-600 text-white rounded-lg font-semibold transition-all hover:bg-yellow-700 hover:scale-105 shadow-lg disabled:opacity-50"
+      >
+        {isConnecting ? "Summoning Portal..." : "Summon MetaMask Portal"}
+      </button>
     </div>
   );
-}
+};
 
 export default ConnectWallet;
