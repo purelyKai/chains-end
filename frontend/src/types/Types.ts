@@ -1,12 +1,12 @@
 export type WorldState = {
-  round: number;
-  numPlayers: number;
+  currentRound: number;
+  totalPlayers: number;
   isPaused: boolean;
-}
+};
 
 export type PlayerState = {
   level: number;
-  exp: number;
+  experience: number;
   isActive: boolean;
   lastPlayTime: number;
-}
+};
