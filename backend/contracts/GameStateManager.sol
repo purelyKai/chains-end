@@ -48,7 +48,6 @@ contract GameStateManager {
   GameState public gameState;
   
   mapping(address => Player) public players;
-  mapping(address => uint256) public playerCoins;
   address[] public playerAddresses;
 
   mapping(uint256 => Mob) public mobs;
@@ -57,7 +56,7 @@ contract GameStateManager {
   mapping(uint256 => Item) public storeItems;
   uint256 public itemCount;
 
-  mapping(address => mapping(uint256 => bool)) public playerItems;
+  mapping(address => uint256[]) public playerItems;
 
   // Events for important state changes
   event PlayerCreated(address indexed playerAddress, uint256 initialStage, uint256 initialLevel, uint256 initialHealth);
@@ -110,26 +109,25 @@ contract GameStateManager {
 
   function purchaseItem(uint256 _itemId) public playerExists(msg.sender) {
     require(storeItems[_itemId].exists, "Item does not exist");
-    require(!playerItems[msg.sender][_itemId], "Item already owned");
     require(players[msg.sender].coins >= storeItems[_itemId].price, "Not enough coins");
+
+    // Check if the player already owns the item
+    uint256[] storage ownedItems = playerItems[msg.sender];
+    for (uint256 i = 0; i < ownedItems.length; i++) {
+      require(ownedItems[i] != _itemId, "Item already owned");
+    }
 
     // Deduct the item's price from the player's coins
     players[msg.sender].coins -= storeItems[_itemId].price;
 
-    // Mark the item as owned by the player
-    playerItems[msg.sender][_itemId] = true;
+    // Add the item ID to the player's array
+    playerItems[msg.sender].push(_itemId);
 
     emit ItemPurchased(msg.sender, _itemId);
   }
 
-  function getPlayerItems(address _playerAddress) public view playerExists(_playerAddress) returns (bool[] memory) {
-    bool[] memory itemsOwned = new bool[](itemCount);
-
-    for (uint256 i = 1; i <= itemCount; i++) {
-      itemsOwned[i - 1] = playerItems[_playerAddress][i];
-    }
-
-    return itemsOwned;
+  function getPlayerItems(address _playerAddress) public view playerExists(_playerAddress) returns (uint256[] memory) {
+    return playerItems[_playerAddress];
   }
 
   function getStoreItem(uint256 _itemId) public view returns (Item memory) {
@@ -284,10 +282,10 @@ contract GameStateManager {
     uint256 coinsToDrop = mobs[_mobId].coinsDropped;
     
     // Add coins to the player who defeated the mob
-    playerCoins[msg.sender] += coinsToDrop;
+    players[msg.sender].coins += coinsToDrop;
   }
 
   function getPlayerCoins() public view returns (uint256) {
-    return playerCoins[msg.sender];
+    return players[msg.sender].coins;
   }
 }
