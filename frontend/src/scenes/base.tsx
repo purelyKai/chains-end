@@ -16,6 +16,7 @@ export class BaseScene extends Phaser.Scene {
   protected killedMobs: string[] = [];
   protected bounderies!: Phaser.Physics.Arcade.StaticGroup;
 
+  protected BASE_DAMAGE = 10
   protected PLAYER_SPEED = 300;
   protected JUMP_VELOCITY = -600;
   protected isAttacking = false;
@@ -118,6 +119,35 @@ export class BaseScene extends Phaser.Scene {
       padding: { x: 0, y: 0 }
     })
     .setScrollFactor(0)
+    const home = this.add.text(1180, 0, "⌂", {
+      fontSize: "32px",
+      color: "#ffffff",
+      padding: { x: 2, y: 0 }
+    })
+    .setScrollFactor(0)
+    .setInteractive()
+
+    home.on("pointerdown", () => {
+      const dimOverlay = this.add.rectangle(0, 0, this.cameras.main.width, this.cameras.main.height, 0x000000, 1)
+        .setOrigin(0, 0)
+        .setDepth(1)
+        .setScrollFactor(0)
+        .setAlpha(0)
+
+      this.tweens.add({
+        targets: [dimOverlay],
+        alpha: 1,
+        duration: 3000,
+        ease: "Power2",
+        onComplete: () => {
+          dimOverlay.destroy();
+          this.game.destroy(true);
+          window.location.href = "/"
+        },
+      });
+      
+    })
+
   }
 
   protected createBackground(): void {
@@ -231,7 +261,7 @@ export class BaseScene extends Phaser.Scene {
     // Increase attack hitbox
     const originalWidth = this.player.body.width;
     const originalHeight = this.player.body.height
-    const attackWidth = originalWidth * 1.50; // Increase attack range by 50%
+    const attackWidth = originalWidth * 1.75; // Increase attack range by 75%
     const attackOffset = this.player.flipX ? -attackWidth / 2 : originalWidth / 2;
     this.player.body.setSize(attackWidth / this.player.scale, originalHeight / this.player.scale);
     this.player.body.setOffset(attackOffset, 0);
@@ -256,7 +286,7 @@ export class BaseScene extends Phaser.Scene {
   }
   
   private async damageMob(mob: MobSprite) {
-    const damage = 10; // You can adjust this or make it a class property
+    const damage = this.BASE_DAMAGE * this.playerState.level;
     const currentHealth = mob.healthBar!.getHealth()
     const newHealth = Math.max(currentHealth - damage, 0);
     mob.setData("health", newHealth);
@@ -324,15 +354,19 @@ export class BaseScene extends Phaser.Scene {
   
   private handlePlayerDefeat(): void {
     console.log("Player defeated!");
-    this.player.setVelocity(0, 0);
+
     this.input.keyboard.enabled = false;
+    this.player.play("idle");
+    this.player.setVelocity(0, 0);
   
-    const gameOverText = this.add.text(
+    this.add.text(
       this.cameras.main.centerX,
       this.cameras.main.centerY,
       "Game Over",
       {  fontFamily: "VP-Pixel", fontSize: "64px", color: "#ff0000" }
-    ).setOrigin(0.5);
+    )
+    .setOrigin(0.5)
+    .setScrollFactor(0)
   
     // Add a restart button
     const restartButton = this.add.text(
@@ -340,7 +374,10 @@ export class BaseScene extends Phaser.Scene {
       this.cameras.main.centerY + 100,
       "Restart",
       { fontFamily: "VP-Pixel", fontSize: "32px", color: "#ffffff", backgroundColor: "#000000", padding: { x: 10, y: 5 } }
-    ).setOrigin(0.5).setInteractive();
+    )
+    .setOrigin(0.5)
+    .setInteractive()
+    .setScrollFactor(0)
   
     restartButton.on("pointerdown", () => {
       this.scene.restart();

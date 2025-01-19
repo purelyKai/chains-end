@@ -36,7 +36,7 @@ export class StageOne extends BaseScene {
     }
   }
 
-  protected createBackground(): void {
+  protected createBackground() {
     this.background = this.add.image(0, 32, "stage_one").setOrigin(0, 0)
     const scaleRatio = (this.cameras.main.height - 32) / this.background.height;
     this.background.setScale(scaleRatio);
@@ -103,7 +103,7 @@ export class StageTwo extends BaseScene {
 
   protected createBackground(): void {
     this.background = this.add.image(0, 32, "stage_two").setOrigin(0, 0)
-    const scaleRatio = (this.cameras.main.height + 32) / this.background.height;
+    const scaleRatio = (this.cameras.main.height - 32) / this.background.height;
     this.background.setScale(scaleRatio);
   }
 
@@ -115,10 +115,12 @@ export class StageTwo extends BaseScene {
         this.cameras.main.height - 150,
         "goblin"
       ) as MobSprite;
+      mob.setScale(2);
       mob.isInvulnerable = false;
       this.setupMob(mob, mobData);
       this.mobs.push(mob);
     }
+    await super.createMobs()
   }
 
   protected nextScene() {
@@ -168,8 +170,8 @@ export class StageThree extends BaseScene {
     }
   }
 
-  protected createBackground(): void {
-    this.background = this.add.image(0, 0, "stage_three").setOrigin(0, 0)
+  protected createBackground() {
+    this.background = this.add.image(0, 32, "stage_three").setOrigin(0, 0)
     const scaleRatio = (this.cameras.main.height - 32) / this.background.height;
     this.background.setScale(scaleRatio);
   }
@@ -182,9 +184,10 @@ export class StageThree extends BaseScene {
       "boss"
     ) as MobSprite;
     mob.isInvulnerable = false;
-    mob.setScale(2);
+    mob.setScale(4);
     this.setupMob(mob, mobData);
     this.mobs.push(mob);
+    await super.createMobs()
   }
 
   protected nextScene() {
@@ -197,19 +200,52 @@ export class StageFour extends BaseScene {
     super("StageFour")
   }
 
-  protected createBackground(): void {
-    this.background = this.add.image(0, 0, "stage_four.png").setOrigin(0, 0)
+  preload() {
+    this.load.image("stage_four", "/stage_four.png")
+  }
+
+  protected createBackground() {
+    this.background = this.add.image(0, 32, "stage_four").setOrigin(0, 0)
     const scaleRatio = (this.cameras.main.height - 32) / this.background.height;
     this.background.setScale(scaleRatio);
-    const dimOverlay = this.add.rectangle(0, 0, this.cameras.main.width, this.cameras.main.height, 0x000000, 0.5);
-    dimOverlay.setOrigin(0, 0);
-    dimOverlay.setDepth(1);
-    this.add.text(this.cameras.main.width / 4, this.cameras.main.height / 2 - 110, "You've saved the Chainverse,\nreclaiming the Chain Cutter Sword.\nGazing into the void, you mourn the souls lost.\nYou cast the sword into oblivion,\nhoping to never see it again.\nNow rest, my wanderer.\nYour story forever etched into the chain...", {
+
+    const dimOverlay = this.add.rectangle(0, 0, this.cameras.main.width, this.cameras.main.height, 0x000000, 0.5)
+      .setOrigin(0, 0)
+      .setDepth(1)
+      .setScrollFactor(0)
+      .setAlpha(0)
+
+    const story = this.add.text(this.cameras.main.width / 4, this.cameras.main.height / 2 - 110, "You've saved the Chainverse,\nreclaiming the Chain Cutter Sword.\nGazing into the void, you mourn the souls lost.\nYou cast the sword into oblivion,\nhoping to never see it again.\nNow rest, my wanderer.\nYour story forever etched into the chain...", {
       fontFamily: "VP-Pixel",
       fontSize: "32px",
       color: "#ffffff",
       padding: { x: 20, y: 10 }
     })
     .setDepth(1000)
+    .setScrollFactor(0)
+    .setInteractive()
+    .setAlpha(0); 
+
+    // Fade in effect
+    this.tweens.add({
+      targets: [story, dimOverlay],
+      alpha: 1,
+      duration: 3000,
+      ease: 'Power2',
+      onComplete: () => {
+        this.time.delayedCall(8000, () => {
+          this.tweens.add({
+            targets: [story, dimOverlay],
+            alpha: 0,
+            duration: 3000,
+            ease: "Power2",
+            onComplete: () => {
+              story.destroy();
+              dimOverlay.destroy();
+            }
+          });
+        });
+      }
+    });
   }
 }
