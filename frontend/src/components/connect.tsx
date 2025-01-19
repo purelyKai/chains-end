@@ -33,8 +33,8 @@ const ConnectWallet = ({ onWalletConnect }: ConnectWalletProps) => {
   };
 
   return (
-    <div className="bg-gray-800 bg-opacity-80 backdrop-blur-md rounded-xl p-6 w-full max-w-md mx-auto text-center">
-      <h2 className="text-2xl font-bold text-yellow-500 mb-4">
+    <div className="bg-gray-700/5 border border-gray-600 backdrop-blur rounded-xl p-6 w-full max-w-md mx-auto text-center">
+      <h2 className="text-2xl font-bold text-white mb-4">
         Connect Your Crypto Wallet
       </h2>
       <p className="text-gray-300 mb-6">
@@ -44,9 +44,9 @@ const ConnectWallet = ({ onWalletConnect }: ConnectWalletProps) => {
       <button
         onClick={connectWallet}
         disabled={isConnecting}
-        className="w-full py-3 px-4 bg-yellow-600 text-white rounded-lg font-semibold transition-all hover:bg-yellow-700 hover:scale-105 shadow-lg disabled:opacity-50"
+        className="w-full py-3 px-4 bg-gray-500/50 border border-gray-600 text-white rounded-lg font-semibold transition-all hover:bg-gray-700/70 hover:scale-105 shadow-lg disabled:opacity-50"
       >
-        {isConnecting ? "Summoning Portal..." : "Summon MetaMask Portal"}
+        {isConnecting ? "Summoning Portal..." : "Summon Wallet Portal"}
       </button>
     </div>
   );

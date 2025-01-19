@@ -116,17 +116,40 @@ export class Battle extends Phaser.Scene {
     this.anims.remove("bossAttack")
 
     if (!this.input?.keyboard) return console.log("you need a keyboard");
-
+    const coins = await getPlayerCoins()
     const playerState = await getPlayerInfo()
-    console.log("DATA", playerState)
+
+    this.add.text(316, 16, `STAGE: ${playerState.stage}    |    LEVEL: ${playerState.level}    |    XP: ${playerState.experience} / 100    |    BALANCE: ${coins}`, {
+      fontFamily: "VP-Pixel",
+      fontSize: "24px",
+      color: "#ffffff",
+      padding: { x: 20, y: 10 }
+    })
+    .setOrigin(0.5)
+    .setScrollFactor(0)
+    .setDepth(1000);
 
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;
 
-    const background = this.add.image(0, 0, "background").setOrigin(0, 0)
+    const background = this.add.image(0, 32, "background").setOrigin(0, 0)
 
-    const scaleRatio = height / background.height;
+    const scaleRatio = (height - 32) / background.height;
     background.setScale(scaleRatio);
+
+    if (playerState.stage > 3) {
+      const dimOverlay = this.add.rectangle(0, 0, this.cameras.main.width, this.cameras.main.height, 0x000000, 0.5);
+      dimOverlay.setOrigin(0, 0);
+      dimOverlay.setDepth(1);
+      this.add.text(this.cameras.main.width / 4, this.cameras.main.height / 2 - 110, "You've saved the Chainverse,\nreclaiming the Chain Cutter Sword.\nGazing into the void, you mourn the souls lost.\nYou cast the sword into oblivion,\nhoping to never see it again.\nNow rest, my wanderer.\nYour story forever etched into the chain...", {
+        fontFamily: "VP-Pixel",
+        fontSize: "32px",
+        color: "#ffffff",
+        padding: { x: 20, y: 10 }
+      })
+      .setDepth(1000)
+      return
+    }
 
     this.player = this.physics.add.sprite(300, height - 200, "player");
     this.player.setScale(2)
@@ -489,7 +512,8 @@ export class Battle extends Phaser.Scene {
       continueButton.destroy();
       const result = await stageCleared()
       console.log("res", result)
-      this.scene.restart();
+      this.scene.remove();
+      this.scene.add("Battle", Battle)
     });
   
     continueButton.on("pointerover", () => {
