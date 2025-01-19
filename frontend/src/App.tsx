@@ -1,12 +1,16 @@
 import { useState, useEffect } from "react";
 import ConnectWallet from "./components/connect";
 import { Game } from "./components/game";
-import { getGameState, createPlayer } from "./contracts/gameState";
+import {
+  getGameState,
+  createPlayer,
+  getPlayerCoins,
+} from "./contracts/gameState";
 import Store from "./components/store";
 
 const App = () => {
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  const [walletBalance, setWalletBalance] = useState<string | null>(null);
+  const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const [hasStartedGame, setHasStartedGame] = useState(false);
   const [gameState, setGameState] = useState<any>(undefined);
   const [isStoreOpen, setIsStoreOpen] = useState(false);
@@ -24,7 +28,8 @@ const App = () => {
     fetchGameState();
   }, []);
 
-  const updateWalletInfo = (address: string, balance: string) => {
+  const updateWalletInfo = async (address: string) => {
+    const balance = await getPlayerCoins();
     setWalletAddress(address);
     setWalletBalance(balance);
   };
@@ -47,17 +52,17 @@ const App = () => {
       <div className="absolute inset-0 bg-black bg-opacity-70" />
 
       {/* Header */}
-      <div className="z-10 text-center px-4 w-full pt-8">
-        <h1 className="text-6xl font-bold text-yellow-500 mb-4 tracking-wider">
+      <div className="z-10 text-center px-4 w-full pt-32">
+        <h1 className="text-7xl font-bold text-gray-300 mb-6 tracking-wider">
           Chain's End
         </h1>
-        <p className="text-xl text-gray-300 mb-8">
+        <p className="text-2xl text-gray-300 mb-10">
           Descend into the Cryptic Depths of the Blockchain Dungeon
         </p>
       </div>
 
       {/* Main Content */}
-      <div className="z-10 flex flex-col items-center justify-center flex-grow w-full px-4">
+      <div className="z-10 flex flex-col items-center justify-start flex-grow w-full px-4 pt-4">
         {!walletAddress ? (
           <ConnectWallet onWalletConnect={updateWalletInfo} />
         ) : (
