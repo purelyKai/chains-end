@@ -2,11 +2,7 @@ import React, { useEffect } from "react";
 import Phaser from "phaser";
 import { Battle } from "../scenes/battle";
 
-type GameProps = {
-  playerAddr: string;
-}
-
-export const Game: React.FC<GameProps> = ({ playerAddr }) => {
+export const Game: React.FC = () => {
     useEffect(() => { 
       const config: Phaser.Types.Core.GameConfig = {
         type: Phaser.AUTO,
@@ -24,14 +20,7 @@ export const Game: React.FC<GameProps> = ({ playerAddr }) => {
             debug: false
           }
         },
-        scene: [Battle],
-        callbacks:  {
-          preBoot: game => {
-            game.registry.merge({
-              playerAddr
-            })
-          }
-        }
+        scene: [Battle]
       };
 
       const game = new Phaser.Game(config);

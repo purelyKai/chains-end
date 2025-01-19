@@ -1,10 +1,10 @@
 import Phaser from "phaser"
-import { getPlayerInfo } from "../contracts/gameState";
+import { getPlayerInfo, createMob, updateMobHealth, getPlayerCoins } from "../contracts/gameState";
 
 const PLAYER_HEALTH = 100
 const PLAYER_DMG = 10
 
-interface SlimeSprite extends Phaser.Physics.Arcade.Sprite {
+interface MobSprite extends Phaser.Physics.Arcade.Sprite {
   healthBar?: HealthBar;
   isInvulnerable: boolean;
 }
@@ -85,11 +85,10 @@ export class Battle extends Phaser.Scene {
     super({ key: "Battle" });
   }
 
-  private level: number = 1
   private player?: Phaser.Physics.Arcade.Sprite
   private playerHealthBar?: HealthBar
   private playerInvulnerable = false;
-  private slimes: (Phaser.Physics.Arcade.Sprite & { healthBar?: HealthBar })[] = []
+  private mobs: (Phaser.Physics.Arcade.Sprite & { healthBar?: HealthBar })[] = []
   private PLAYER_SPEED = 300
   private JUMP_VELOCITY = -600
   private isAttacking = false
@@ -98,6 +97,8 @@ export class Battle extends Phaser.Scene {
     this.load.image("background", "/background.png")
     this.load.image("player", "/idle.png")
     this.load.image("slime", "/slime.png")
+    this.load.image("goblin", "/slime.png")
+    this.load.image("boss", "/slime.png")
     this.load.spritesheet("run", "/run.png", { frameWidth: 32, frameHeight: 40 })
     this.load.spritesheet("attack", "/attack.png", { frameWidth: 50, frameHeight: 40 })
   }
@@ -105,9 +106,8 @@ export class Battle extends Phaser.Scene {
   async create() {
     if (!this.input?.keyboard) return console.log("you need a keyboard");
 
-    const playerAddr = this.registry.get("playerAddr")
-    const data = await getPlayerInfo()
-    console.log("DATA", data)
+    const playerState = await getPlayerInfo()
+    console.log("DATA", playerState)
 
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;
@@ -159,62 +159,77 @@ export class Battle extends Phaser.Scene {
     this.physics.add.existing(platform, true);
     this.physics.add.collider(this.player, platform);
 
-    for (let i = 0; i < 3; i++) {
-      const slime = this.physics.add.sprite(
+    let n: number, mobName: string;
+    if (playerState.stage == 1) {
+      n = 3
+      mobName = "slime"
+    } else if (playerState.stage == 2) {
+      n = 2
+      mobName = "goblin"
+    } else {
+      n = 1
+      mobName = "boss"
+    }
+
+    for (let i = 0; i < n; i++) {
+      const mobData = await createMob(mobName)
+
+      const mob = this.physics.add.sprite(
         this.cameras.main.width + 100 + (i * 100),
         height - 150,
-        "slime"
-      ) as SlimeSprite;
+        mobName
+      ) as MobSprite;
 
-      slime.healthBar = new HealthBar(this, slime, 15);
-      slime.isInvulnerable = false
+      mob.healthBar = new HealthBar(this, mob, mobData.health);
+      mob.isInvulnerable = false
       
-      this.physics.add.collider(slime, leftBoundary);
-      this.physics.add.collider(slime, rightBoundary);
-      this.physics.add.collider(slime, platform);
-      this.slimes.push(slime);
+      this.physics.add.collider(mob, leftBoundary);
+      this.physics.add.collider(mob, rightBoundary);
+      this.physics.add.collider(mob, platform);
+      this.mobs.push(mob);
 
-      this.physics.add.overlap(slime, this.player, () => {
+      this.physics.add.overlap(mob, this.player, async() => {
         if (!this.player) return
-        if (this.isAttacking && !slime.isInvulnerable) {
-          slime.isInvulnerable = true
+        if (this.isAttacking && !mob.isInvulnerable) {
+          mob.isInvulnerable = true
           const knockbackDirection = this.player.flipX ? -1 : 1;
           const KNOCKBACK_FORCE = 400
 
-          slime.setVelocityX(KNOCKBACK_FORCE * knockbackDirection);
-          slime.setVelocityY(-200)
+          mob.setVelocityX(KNOCKBACK_FORCE * knockbackDirection);
+          mob.setVelocityY(-200)
 
-          slime.setTint(0xff0000);
+          mob.setTint(0xff0000);
           this.time.delayedCall(200, () => {
-            slime.clearTint();
+            mob.clearTint();
           });
           this.time.delayedCall(800, () => {
-            slime.isInvulnerable = false
+            mob.isInvulnerable = false
           })
           
           const checkLanding = () => {
-            if (!slime.body) return
-            if (slime.body.touching.down) {
-              slime.setVelocityX(0);
+            if (!mob.body) return
+            if (mob.body.touching.down) {
+              mob.setVelocityX(0);
               this.events.removeListener("update", checkLanding);
             }
           };
           this.events.on("update", checkLanding);
 
-          const isDead = slime.healthBar?.takeDamage(PLAYER_DMG)
+          const isDead = mob.healthBar?.takeDamage(PLAYER_DMG)
           if (isDead) {
-            slime.healthBar?.destroy();
-            slime.destroy();
-            this.slimes = this.slimes.filter(s => s !== slime);
+            mob.healthBar?.destroy();
+            mob.destroy();
+            this.mobs = this.mobs.filter(s => s !== mob);
+            await updateMobHealth(mobData.id, mobData.health)
           }
 
-          if (this.slimes.length === 0) {
+          if (this.mobs.length === 0) {
             this.handleVictory()
           }
 
         } else if(!this.playerInvulnerable) {
           this.playerInvulnerable = true
-          const knockbackDirection = slime.flipX ? -1 : 1;
+          const knockbackDirection = mob.flipX ? -1 : 1;
           const KNOCKBACK_FORCE = 400
 
           this.player.setVelocityX(KNOCKBACK_FORCE * knockbackDirection);
@@ -228,7 +243,7 @@ export class Battle extends Phaser.Scene {
             this.playerInvulnerable = false
           })
 
-          const isDead = this.playerHealthBar?.takeDamage(10)
+          const isDead = this.playerHealthBar?.takeDamage(mobData.attack)
           if (isDead) {
             this.playerHealthBar?.destroy()
             this.player.destroy()
@@ -236,7 +251,7 @@ export class Battle extends Phaser.Scene {
         }
       });
 
-      this.startSlimeJumping(slime);
+      this.startSlimeJumping(mob);
     }
 
     const deadZoneWidth = width * 0.6;
@@ -372,7 +387,9 @@ export class Battle extends Phaser.Scene {
     jump();
   }
 
-  handleVictory() {
+  async handleVictory() {
+    const coins = await getPlayerCoins()
+    console.log("coins", coins)
     const camera = this.cameras.main;
     const { width, height } = camera;
   
