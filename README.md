@@ -8,7 +8,7 @@ In a world of never ending connected blocks, a wanderer sought revenge for his l
 The wanderer traveled through the Chain Verse fighting countless battles, each bringing him closer to the one who took everything from him. Many stood in his way, but his grief was stronger than any obstacle.
 When he finally faced the enemy, the battle was more than just a clash of weapons—it was a confrontation with loss itself.
 In the end, he did the only thing that could truly heal: he cast the sword into the void, hoping to prevent such pain from ever happening again.
-And so he wanders on, his journey forever blazed in the blockchain.
+And so he wanders on, his journey forever etched into the blockchain.
 
 ## Tech, Libs, & Frameworks
 

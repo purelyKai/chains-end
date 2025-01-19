@@ -1,16 +1,14 @@
-// src/contracts/gameState.ts
-
 import { ethers } from "ethers";
 import gameStateABI from "../abis/ChainsEnd_GameState.json";
 
 // Deployed contract address
-const CONTRACT_ADDRESS = "0xB0D4afd8879eD9F52b28595d31B441D079B2Ca07";
+const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS;
 
 // Create a provider and signer (assuming MetaMask is used)
 const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545"); // For Hardhat
 // const provider = new ethers.Web3Provider(window.ethereum);
 const signer = await provider.getSigner();
-const gameStateContract = new ethers.Contract(
+const contract = new ethers.Contract(
   CONTRACT_ADDRESS,
   gameStateABI.abi,
   signer
@@ -38,9 +36,6 @@ export type PlayerData = {
 
 export async function createPlayer() {
   try {
-    // Get contract instance
-    const contract = gameStateContract;
-
     // Call create player function
     const tx = await contract.createPlayer();
 
@@ -56,9 +51,6 @@ export async function createPlayer() {
 
 export async function getPlayerInfo() {
   try {
-    // Get contract instance
-    const contract = gameStateContract;
-
     // Call get player info function
     const playerInfo = await contract.getPlayerInfo();
 
@@ -79,8 +71,6 @@ export async function getPlayerInfo() {
 
 export async function stageCleared() {
   try {
-    const contract = gameStateContract;
-
     // Call the stageCleared function
     const tx = await contract.stageCleared();
 
@@ -96,9 +86,6 @@ export async function stageCleared() {
 
 export async function getGameState() {
   try {
-    // Get contract instance
-    const contract = gameStateContract;
-
     // Call get game state function
     const gameState = await contract.getGameState();
 
@@ -115,8 +102,6 @@ export async function getGameState() {
 export async function createMob(name: string) {
   if (name == "slime") {
     try {
-      const contract = gameStateContract;
-
       const tx = await contract.createSlime();
       const receipt = await tx.wait();
 
@@ -144,8 +129,6 @@ export async function createMob(name: string) {
     }
   } else if (name == "goblin") {
     try {
-      const contract = gameStateContract;
-
       const tx = await contract.createGoblin();
 
       const receipt = await tx.wait();
@@ -174,8 +157,6 @@ export async function createMob(name: string) {
     }
   } else {
     try {
-      const contract = gameStateContract;
-
       const tx = await contract.createBoss();
 
       const receipt = await tx.wait();
@@ -207,11 +188,7 @@ export async function createMob(name: string) {
 
 export async function killMob(id: string) {
   try {
-    const contract = gameStateContract;
-
     const tx = await contract.killMob(id);
-
-    const receipt = await tx.wait();
 
     console.log(receipt);
   } catch (error) {
@@ -222,10 +199,7 @@ export async function killMob(id: string) {
 
 export async function getPlayerCoins() {
   try {
-    const contract = gameStateContract;
-
     const coins = await contract.getPlayerCoins();
-
     return Number(coins);
   } catch (error) {
     console.error("Error getting player coins", error);
@@ -235,8 +209,6 @@ export async function getPlayerCoins() {
 
 export async function getMob(mobId: number) {
   try {
-    const contract = gameStateContract;
-
     const mob = await contract.getMob(mobId);
 
     return {
@@ -256,10 +228,8 @@ export async function getMob(mobId: number) {
 
 export async function getAllStoreItems() {
   try {
-    const contract = gameStateContract;
     // Call getAllStoreItems function from the contract
-    const items = await contract.getAllStoreItems();
-    // Map items to an array of objects with readable formats
+    const items = await contract.getAllStoreItems(); // Map items to an array of objects with readable formats
     return items.map((item: any) => ({
       id: Number(item.id),
       name: item.name,
@@ -275,7 +245,6 @@ export async function getAllStoreItems() {
 
 export async function purchaseItem(itemId: number) {
   try {
-    const contract = gameStateContract;
     const tx = await contract.purchaseItem(itemId);
     const receipt = await tx.wait();
     return receipt;
@@ -287,7 +256,6 @@ export async function purchaseItem(itemId: number) {
 
 export async function getPlayerItems(playerAddress: string) {
   try {
-    const contract = gameStateContract;
     const ownedItemIds = await contract.getPlayerItems(playerAddress);
     return ownedItemIds;
   } catch (error) {
