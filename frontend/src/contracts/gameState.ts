@@ -1,7 +1,6 @@
 // src/contracts/GameStateContract.ts
 
 import { ethers } from "ethers";
-import { PlayerState, WorldState } from "../types/types";
 import gameStateABI from "../abis/ChainsEnd_GameState.json";
 
 // Deployed contract address
@@ -20,17 +19,17 @@ const gameStateContract = new ethers.Contract(
 export async function createPlayer() {
   try {
     // Get contract instance
-    const contract = gameStateContract
-    
+    const contract = gameStateContract;
+
     // Call create player function
     const tx = await contract.createPlayer();
-    
+
     // Wait for transaction to be mined
     const receipt = await tx.wait();
-    
+
     return receipt;
   } catch (error) {
-    console.error('Error creating player', error);
+    console.error("Error creating player", error);
     throw error;
   }
 }
@@ -38,11 +37,11 @@ export async function createPlayer() {
 export async function getPlayerInfo() {
   try {
     // Get contract instance
-    const contract = gameStateContract
-    
+    const contract = gameStateContract;
+
     // Call get player info function
     const playerInfo = await contract.getPlayerInfo();
-    
+
     // Convert BigNumber to regular numbers
     return {
       stage: Number(playerInfo.stage),
@@ -50,10 +49,10 @@ export async function getPlayerInfo() {
       experience: Number(playerInfo.experience),
       health: Number(playerInfo.health),
       createdAt: new Date(Number(playerInfo.createdAt)),
-      exists: playerInfo.exists
+      exists: playerInfo.exists,
     };
   } catch (error) {
-    console.error('Error getting player info', error);
+    console.error("Error getting player info", error);
     throw error;
   }
 }
@@ -61,8 +60,8 @@ export async function getPlayerInfo() {
 export async function getGameState() {
   try {
     // Get contract instance
-    const contract = gameStateContract
-    
+    const contract = gameStateContract;
+
     // Call get game state function
     const gameState = await contract.getGameState();
 
@@ -71,7 +70,7 @@ export async function getGameState() {
       totalPlayers: Number(gameState.totalPlayers),
     };
   } catch (error) {
-    console.error('Error getting game state', error);
+    console.error("Error getting game state", error);
     throw error;
   }
 }
