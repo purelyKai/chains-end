@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getPlayerCoins } from "../contracts/gameState";
+import { getPlayerCoins, getAllStoreItems } from "../contracts/gameState";
 
 interface StoreProps {
   onClose: () => void;
@@ -13,64 +13,33 @@ interface StoreItem {
   image: string;
 }
 
-const storeItems: StoreItem[] = [
-  {
-    id: 1,
-    name: "Ethereum Sword",
-    description: "A powerful sword infused with Ethereum's might",
-    price: 100,
-    image: "/eth-sword.png",
-  },
-  {
-    id: 2,
-    name: "Bitcoin Shield",
-    description: "An unbreakable shield forged from Bitcoin",
-    price: 150,
-    image: "/btc-shield.png",
-  },
-  {
-    id: 3,
-    name: "Chainlink Boots",
-    description: "Boots that grant incredible speed and agility",
-    price: 10,
-    image: "/link-boots.png",
-  },
-  {
-    id: 4,
-    name: "Polkadot Armor",
-    description: "Armor that connects and protects",
-    price: 200,
-    image: "/dot-armor.png",
-  },
-  {
-    id: 5,
-    name: "Cardano Bow",
-    description: "A precise and powerful bow",
-    price: 120,
-    image: "/ada-bow.png",
-  },
-  {
-    id: 6,
-    name: "Solana Cloak",
-    description: "A cloak that grants stealth and speed",
-    price: 80,
-    image: "/sol-cloak.png",
-  },
-];
+/*
+const accounts = await window.ethereum.request({
+  method: "eth_requestAccounts",
+});
+const address = accounts[0];
+*/
 
 const Store = ({ onClose }: StoreProps) => {
   const [selectedItem, setSelectedItem] = useState<StoreItem | null>(null);
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const [gameMessage, setGameMessage] = useState<string | null>(null);
   const [purchasedItems, setPurchasedItems] = useState<number[]>([]); // Track purchased item IDs
+  const [allStoreItems, setAllStoreItems] = useState<StoreItem[]>([]);
 
   // Fetch wallet balance when the component mounts
   useEffect(() => {
+    const fetchAllStoreItems = async () => {
+      const allItems = await getAllStoreItems();
+      setAllStoreItems(allItems);
+    };
     const fetchBalance = async () => {
       const balance = await getPlayerCoins();
       setWalletBalance(balance);
     };
+
     fetchBalance();
+    fetchAllStoreItems();
   }, []);
 
   useEffect(() => {
@@ -120,7 +89,7 @@ const Store = ({ onClose }: StoreProps) => {
         </div>
         <div className="overflow-x-auto">
           <div className="flex space-x-6 pb-4">
-            {storeItems.map((item) => (
+            {allStoreItems.map((item) => (
               <div
                 key={item.id}
                 className={`bg-gray-700 rounded-lg p-4 cursor-pointer transition-all ${

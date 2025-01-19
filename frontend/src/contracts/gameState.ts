@@ -4,7 +4,7 @@ import { ethers } from "ethers";
 import gameStateABI from "../abis/ChainsEnd_GameState.json";
 
 // Deployed contract address
-const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+const CONTRACT_ADDRESS = "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318";
 
 // Create a provider and signer (assuming MetaMask is used)
 const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545"); // For Hardhat
@@ -274,7 +274,7 @@ export async function getAllStoreItems() {
   }
 }
 
-export async function buyItem(itemId: number) {
+export async function purchaseItem(itemId: number) {
   try {
     const contract = gameStateContract;
     const tx = await contract.purchaseItem(itemId);
@@ -289,14 +289,8 @@ export async function buyItem(itemId: number) {
 export async function getPlayerItems(playerAddress: string) {
   try {
     const contract = gameStateContract;
-    const playerItems = await contract.getPlayerItems(playerAddress);
-    return playerItems.map((item: any) => ({
-      id: Number(item.id),
-      name: item.name,
-      price: Number(item.price),
-      description: item.description,
-      image: item.image,
-    }));
+    const ownedItemIds = await contract.getPlayerItems(playerAddress);
+    return ownedItemIds;
   } catch (error) {
     console.error("Error getting player items", error);
     throw error;
