@@ -16,6 +16,17 @@ const gameStateContract = new ethers.Contract(
   signer
 );
 
+export type MobData = {
+  id: number
+  name: string
+  enemyType: string
+  health: number
+  attack: number
+  coinsDropped: number
+  exists: boolean
+  isDead: boolean
+}
+
 export async function createPlayer() {
   try {
     // Get contract instance

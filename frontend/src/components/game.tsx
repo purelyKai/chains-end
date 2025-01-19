@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import Phaser from "phaser";
-import { Battle } from "../scenes/battle";
+import { StageOne, StageTwo, StageThree, StageFour } from "../scenes/stages";
 
 export const Game: React.FC = () => {
     useEffect(() => { 
@@ -20,7 +20,7 @@ export const Game: React.FC = () => {
             debug: false
           }
         },
-        scene: [Battle]
+        scene: [StageOne, StageTwo, StageThree, StageFour]
       };
 
       const game = new Phaser.Game(config);

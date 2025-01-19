@@ -111,7 +111,7 @@ const App = () => {
               &gt; Address: {walletAddress || "Not Connected"}
             </p>
             <p className="text-green-400 text-md">
-              &gt; Balance: {walletBalance ? `${walletBalance} FRAG` : "N/A"}
+              &gt;  Balance: {walletBalance ? `${walletBalance} BLOCK FRAGMENTS` : "N/A"}
             </p>
           </div>
         </div>
