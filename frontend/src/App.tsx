@@ -8,7 +8,7 @@ const App = () => {
 
   if (!walletAddress) {
     return (
-      <div className="App">
+      <div>
         <h1>Chain's End</h1>
         <ConnectWallet onWalletConnect={setWalletAddress} />
         {walletAddress && <GameInterface walletAddress={walletAddress} />}
@@ -17,7 +17,7 @@ const App = () => {
   }
 
   return (
-    <div className="w-screen h-screen flex items-center justify-center">
+    <div className="bg-black w-screen h-screen flex items-center justify-center">
       <div className="w-full h-1/2">
         <Game />
       </div>

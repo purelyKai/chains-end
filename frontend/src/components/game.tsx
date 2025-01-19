@@ -9,18 +9,18 @@ export const Game: React.FC = () => {
         parent: "game-container",
         scale: {
           mode: Phaser.Scale.FIT,
-          width: "100%",
-          height: "100%",
+          width: 1200,
+          height: 400,
           autoCenter: Phaser.Scale.CENTER_BOTH
         },
         physics: {
           default: "arcade",
           arcade: {
-            gravity: { x: 0, y: 300 },
+            gravity: { x: 0, y: 1500 },
             debug: false
           }
         },
-        scene: Battle
+        scene: [Battle]
       };
 
       const game = new Phaser.Game(config);
@@ -30,5 +30,5 @@ export const Game: React.FC = () => {
       };
     }, []);
 
-    return <div id="game-container" className="h-full w-full" />
+    return <div id="game-container" className="h-full w-full font-[VP-Pixel]" />
 };

@@ -6,7 +6,7 @@ import {
   getPlayerState,
 } from "../contracts/gameState";
 
-interface GameInterfaceProps {
+type GameInterfaceProps = {
   walletAddress: string;
 }
 

@@ -1,10 +1,10 @@
-export interface WorldState {
+export type WorldState = {
   round: number;
   numPlayers: number;
   isPaused: boolean;
 }
 
-export interface PlayerState {
+export type PlayerState = {
   level: number;
   exp: number;
   isActive: boolean;

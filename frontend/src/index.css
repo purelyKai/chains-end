@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  @font-face {
+    font-family: VP-Pixel;
+    src: url("/VPPixel.otf") format("opentype");
+  }
+}
+
 body {
   margin: 0;
   overscroll-behavior: none;
