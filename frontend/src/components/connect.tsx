@@ -11,7 +11,7 @@ interface ConnectWalletProps {
   onWalletConnect: (address: string) => void;
 }
 
-function ConnectWallet({ onWalletConnect }: ConnectWalletProps) {
+const ConnectWallet = ({ onWalletConnect }: ConnectWalletProps) => {
   // useState for storing and retrieving wallet details
   const [data, setData] = useState<WalletData>({
     address: "",

@@ -2,7 +2,7 @@
 
 import { ethers } from "ethers";
 import { JsonRpcProvider } from "ethers";
-import { PlayerState, WorldState } from "../types/Types";
+import { PlayerState, WorldState } from "../types/types";
 import gameStateABI from "../abis/ChainsEnd_GameState.json";
 
 // Deployed contract address

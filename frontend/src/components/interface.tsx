@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { PlayerState, WorldState } from "../types/Types";
+import { PlayerState, WorldState } from "../types/types";
 import {
   joinGame,
   getWorldState,
   getPlayerState,
-} from "../contracts/GameStateContract";
+} from "../contracts/gameState";
 
 interface GameInterfaceProps {
   walletAddress: string;
