@@ -33,7 +33,7 @@ const App = () => {
     return (
       <div className="bg-black w-screen h-screen flex items-center justify-center">
         <div className="w-full h-1/2">
-          <Game playerAddr={walletAddress!} />
+          <Game />
         </div>
       </div>
     );
