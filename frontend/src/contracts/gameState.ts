@@ -4,16 +4,6 @@ import gameStateABI from "../abis/ChainsEnd_GameState.json";
 // Deployed contract address
 const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS;
 
-// Create a provider and signer (assuming MetaMask is used)
-const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545"); // For Hardhat
-// const provider = new ethers.Web3Provider(window.ethereum);
-const signer = await provider.getSigner();
-const contract = new ethers.Contract(
-  CONTRACT_ADDRESS,
-  gameStateABI.abi,
-  signer
-);
-
 export type MobData = {
   id: number;
   name: string;
@@ -33,6 +23,56 @@ export type PlayerData = {
   createdAt: Date;
   exists: boolean;
 };
+
+const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545"); // For Hardhat
+// const provider = new ethers.Web3Provider(window.ethereum);
+const signer = await provider.getSigner();
+const contract = new ethers.Contract(
+  CONTRACT_ADDRESS,
+  gameStateABI.abi,
+  signer
+);
+
+// async function connectToContract() {
+//   try {
+//       // Check if MetaMask is installed
+//       if (!window.ethereum) {
+//           throw new Error("Please install MetaMask to interact with this dApp");
+//       }
+
+//       // Request account access if needed
+//       await window.ethereum.request({ method: 'eth_requestAccounts' });
+
+//       // Create Web3Provider using MetaMask
+//       const provider = new ethers.BrowserProvider(window.ethereum);
+
+//       // Get signer (current connected account)
+//       const signer = await provider.getSigner();
+
+//       // Create contract instance
+//       const contract = new ethers.Contract(
+//           CONTRACT_ADDRESS,
+//           gameStateABI.abi,
+//           signer
+//       );
+
+//       // Verify we're connected to Sepolia
+//       const network = await provider.getNetwork();
+//       if (network.chainId !== 11155111n) { // Sepolia chainId
+//           await window.ethereum.request({
+//               method: 'wallet_switchEthereumChain',
+//               params: [{ chainId: '0xaa36a7' }], // Sepolia chainId in hex
+//           });
+//       }
+
+//       return { provider, signer, contract };
+//   } catch (error) {
+//       console.error("Error connecting to contract:", error);
+//       throw error;
+//   }
+// }
+
+// const { provider, signer, contract } = await connectToContract()
 
 export async function createPlayer() {
   try {
