@@ -76,37 +76,40 @@ export class StageTwo extends BaseScene {
   async create() {
     await super.create()
 
-    this.anims.create({
-      key: "goblinIdle",
-      frames: this.anims.generateFrameNumbers("goblin", { start: 0, end: 3 }),
-      frameRate: 12,
-      repeat: -1
-    });
+    if (!this.anims.exists("goblinIdle")) {
+      this.anims.create({
+        key: "goblinIdle",
+        frames: this.anims.generateFrameNumbers("goblin", { start: 0, end: 3 }),
+        frameRate: 12,
+      });
+    }
 
-    this.anims.create({
-      key: "goblinRun",
-      frames: this.anims.generateFrameNumbers("goblin", { start: 4, end: 11 }),
-      frameRate: 12,
-      repeat: -1
-    });
+    if (!this.anims.exists("goblinRun")) {
+      this.anims.create({
+        key: "goblinRun",
+        frames: this.anims.generateFrameNumbers("goblin", { start: 8, end: 15 }),
+        frameRate: 12,
+      });
+    }
 
-    this.anims.create({
-      key: "goblinAttack",
-      frames: this.anims.generateFrameNumbers("goblin", { start: 12, end: 17 }),
-      frameRate: 10,
-      repeat: 0 
-    });
+    if (!this.anims.exists("goblinAttack")) {
+      this.anims.create({
+        key: "goblinAttack",
+        frames: this.anims.generateFrameNumbers("goblin", { start: 12, end: 17 }),
+        frameRate: 10,
+      });
+    }
   }
 
   protected createBackground(): void {
-    this.background = this.add.image(0, 0, "stage_two").setOrigin(0, 0)
-    const scaleRatio = (this.cameras.main.height - 64) / this.background.height;
+    this.background = this.add.image(0, 32, "stage_two").setOrigin(0, 0)
+    const scaleRatio = (this.cameras.main.height + 32) / this.background.height;
     this.background.setScale(scaleRatio);
   }
 
   protected async createMobs() {
-    const mobData = await createMob("goblin");
     for (let i = 0; i < 2; i++) {
+      const mobData = await createMob("goblin");
       const mob = this.physics.add.sprite(
         this.cameras.main.width + 100 + (i * 100),
         this.cameras.main.height - 150,
@@ -137,26 +140,32 @@ export class StageThree extends BaseScene {
   async create() {
     await super.create()
 
-    this.anims.create({
-      key: "bossIdle",
-      frames: this.anims.generateFrameNumbers("boss", { start: 0, end: 7 }),
-      frameRate: 12,
-      repeat: -1
-    });
+    if (!this.anims.exists("bossIdle")) {
+      this.anims.create({
+        key: "bossIdle",
+        frames: this.anims.generateFrameNumbers("boss", { start: 0, end: 7 }),
+        frameRate: 12,
+        repeat: -1
+      });
+    }
 
-    this.anims.create({
-      key: "bossRun",
-      frames: this.anims.generateFrameNumbers("boss", { start: 8, end: 15 }),
-      frameRate: 12,
-      repeat: -1
-    });
-
-    this.anims.create({
-      key: "bossAttack",
-      frames: this.anims.generateFrameNumbers("boss", { start: 16, end: 20 }),
-      frameRate: 10,
-      repeat: 0 
-    });
+    if (!this.anims.exists("bossRun")) {
+      this.anims.create({
+        key: "bossRun",
+        frames: this.anims.generateFrameNumbers("boss", { start: 8, end: 15 }),
+        frameRate: 12,
+        repeat: -1
+      });
+    }
+    
+    if (!this.anims.exists("bossAttack")) {
+      this.anims.create({
+        key: "bossAttack",
+        frames: this.anims.generateFrameNumbers("boss", { start: 16, end: 20 }),
+        frameRate: 10,
+        repeat: 0 
+      });
+    }
   }
 
   protected createBackground(): void {

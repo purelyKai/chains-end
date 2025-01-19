@@ -6,12 +6,6 @@ export interface MobSprite extends Phaser.Physics.Arcade.Sprite {
   isInvulnerable: boolean;
 }
 
-export const ENEMY_TYPES = {
-  1: "slime",
-  2: "goblin",
-  3: "boss"
-};
-
 export class BaseScene extends Phaser.Scene {
   protected background!: Phaser.GameObjects.Image;
   protected player!: Phaser.Physics.Arcade.Sprite;
@@ -43,34 +37,60 @@ export class BaseScene extends Phaser.Scene {
     this.createPlayer();
     this.setupCamera();
     await this.setupInputs();
-    this.createAnimations();
 
     // Start loading blockchain data
     this.loadBlockchainData();
+    this.createAnimations();
   }
 
   protected createAnimations(): void {
-    this.anims.create({
-      key: "idle",
-      frames: [{ key: "player" }],
-      frameRate: 1
-    });
+    if (!this.anims.exists("idle")) {
+      this.anims.create({
+        key: "idle",
+        frames: [{ key: "player" }],
+        frameRate: 1
+      });
+    }
 
-    this.anims.create({
-      key: "run",
-      frames: this.anims.generateFrameNumbers("run", { start: 0, end: 2 }),
-      frameRate: 10
-    });
-
-    this.anims.create({
-      key: "attack",
-      frames: this.anims.generateFrameNumbers("attack", { start: 0, end: 2 }),
-      frameRate: 10,
-    });
+    if (!this.anims.exists("run")) {
+      this.anims.create({
+        key: "run",
+        frames: this.anims.generateFrameNumbers("run", { start: 0, end: 2 }),
+        frameRate: 10
+      });
+    }
+  
+    if (!this.anims.exists("attack")) {
+      this.anims.create({
+        key: "attack",
+        frames: this.anims.generateFrameNumbers("attack", { start: 0, end: 2 }),
+        frameRate: 10,
+      });
+    }
   }
 
   protected async loadBlockchainData() {
-    const loadingText = this.add.text(0, 0, "Loading game data...", { fontSize: "24px", color: "#ffffff" }).setScrollFactor(0)
+    const loadingOverlay = this.add.rectangle(
+      this.cameras.main.centerX, 
+      this.cameras.main.centerY, 
+      this.cameras.main.width, 
+      this.cameras.main.height, 
+      0x000000
+    ).setDepth(1000).setScrollFactor(0);
+  
+    // Add loading text
+    const loadingText = this.add.text(
+      this.cameras.main.centerX, 
+      this.cameras.main.centerY, 
+      "Loading game data...", 
+      { 
+        fontSize: "24px", 
+        color: "#ffffff" 
+      }
+    )
+    .setOrigin(0.5)
+    .setDepth(1001)
+    .setScrollFactor(0);
     
     try {
       this.playerState = await getPlayerInfo();
@@ -86,6 +106,7 @@ export class BaseScene extends Phaser.Scene {
       console.error("Error loading blockchain data:", error);
     } finally {
       loadingText.destroy();
+      loadingOverlay.destroy();
     }
   }
 
@@ -329,6 +350,7 @@ export class BaseScene extends Phaser.Scene {
   protected async setupMob(mob: MobSprite, mobData: MobData): Promise<void> {
     mob.setData("id", mobData.id);
     mob.setData("type", Number(mobData.enemyType))
+    mob.setData("name", mobData.name);
     mob.setData("health", mobData.health);
     mob.setData("attack", mobData.attack);
     mob.setData("coinDrop", mobData.coinsDropped);
@@ -372,24 +394,19 @@ export class BaseScene extends Phaser.Scene {
         this.events.on("update", () => {
           if (!this.player || !mob.active) return;
       
-          const speed = mob.getData("type") === "boss" ? 80 : 60; // Boss is faster
-          const direction = new Phaser.Math.Vector2(this.player.x - mob.x, this.player.y - mob.y).normalize();
+          const speed = mob.getData("name") === "boss" ? 200 : 150; // Boss is faster
+          const direction = Math.sign(this.player.x - mob.x)
           
-          mob.setVelocity(direction.x * speed, direction.y * speed);
+          mob.setVelocityX(direction * speed);
       
           // Flip the mob sprite based on movement direction
-          if (direction.x < 0) {
+          if (direction < 0) {
             mob.setFlipX(true);
-          } else if (direction.x > 0) {
+          } else if (direction > 0) {
             mob.setFlipX(false);
           }
-      
-          // Play appropriate animation
-          if (Math.abs(direction.x) > 0.1 || Math.abs(direction.y) > 0.1) {
-            mob.play(`${ENEMY_TYPES[mob.getData("type")]}Run`, true);
-          } else {
-            mob.play(`${ENEMY_TYPES[mob.getData("type")]}Idle`, true);
-          }
+
+          mob.play(`${mob.getData("name")}Run`, true);
         });
         break
     }

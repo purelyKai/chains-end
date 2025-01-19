@@ -203,7 +203,7 @@ contract GameStateManager {
 
     mobs[mobCount] = Mob({
       id: mobCount,
-      name: "Basic Slime",
+      name: "slime",
       enemyType: EnemyType.Slime,
       health: 15,
       attack: 10,
@@ -212,7 +212,7 @@ contract GameStateManager {
       exists: true,
       isDead: false
     });
-    emit MobCreated(mobCount, "Basic Slime", EnemyType.Slime, 15, 10, 5, 40);
+    emit MobCreated(mobCount, "slime", EnemyType.Slime, 15, 10, 5, 40);
 
     return mobCount;
   }
@@ -222,7 +222,7 @@ contract GameStateManager {
 
     mobs[mobCount] = Mob({
       id: mobCount,
-      name: "Forest Goblin",
+      name: "goblin",
       enemyType: EnemyType.Goblin,
       health: 30,
       attack: 15,
@@ -231,7 +231,7 @@ contract GameStateManager {
       exists: true,
       isDead: false
     });
-    emit MobCreated(mobCount, "Forest Goblin", EnemyType.Goblin, 30, 15, 20, 60);
+    emit MobCreated(mobCount, "goblin", EnemyType.Goblin, 30, 15, 20, 60);
 
     return mobCount;
   }
@@ -241,7 +241,7 @@ contract GameStateManager {
 
     mobs[mobCount] = Mob({
       id: mobCount,
-      name: "Chainverse Destroyer",
+      name: "boss",
       enemyType: EnemyType.Boss,
       health: 100,
       attack: 25,
@@ -250,7 +250,7 @@ contract GameStateManager {
       exists: true,
       isDead: false
     });
-    emit MobCreated(mobCount, "Chainverse Destroyer", EnemyType.Boss, 100, 25, 100, 150);
+    emit MobCreated(mobCount, "boss", EnemyType.Boss, 100, 25, 100, 150);
 
     return mobCount;
   }
