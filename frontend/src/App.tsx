@@ -28,12 +28,12 @@ const App = () => {
 
     fetchGameState();
 
-    const handleKeyPress = async(event: KeyboardEvent) => {
+    const handleKeyPress = async (event: KeyboardEvent) => {
       if (event.key === "Enter") {
         setHasStartedGame(true);
         await createPlayer();
       } else if (event.key === "t" || event.key === "T") {
-        setIsStoreOpen(true)
+        setIsStoreOpen(true);
       }
     };
 
@@ -55,12 +55,12 @@ const App = () => {
   if (hasStartedGame) {
     return (
       <>
-      <Music />
-      <div className="bg-black w-screen h-screen flex items-center justify-center">
-        <div className="w-full h-1/2">
-          <Game />
+        <Music />
+        <div className="bg-black w-screen h-screen flex items-center justify-center">
+          <div className="w-full h-1/2">
+            <Game />
+          </div>
         </div>
-      </div>
       </>
     );
   }
@@ -92,8 +92,9 @@ const App = () => {
           ) : (
             <div className="space-y-4 text-center">
               <p className="text-2xl text-green-400">
-                {gameState?.totalPlayers || "Loading..."} Brave Soul
-                {gameState?.totalPlayers ? " Has" : "s Have"} Entered the Dungeon
+                {gameState?.totalPlayers || "No"} Brave Soul
+                {gameState?.totalPlayers ? " Has" : "s Have"} Entered the
+                Dungeon
               </p>
               <div className="flex flex-col text-lg text-gray-300">
                 <div>"enter" to explore dungeon</div>
@@ -107,10 +108,10 @@ const App = () => {
         <div className="z-10 w-full p-3">
           <div className="">
             <p className="text-green-400 text-md truncate">
-              &gt;  Address: {walletAddress || "Not Connected"}
+              &gt; Address: {walletAddress || "Not Connected"}
             </p>
             <p className="text-green-400 text-md">
-              &gt;  Balance: {walletBalance ? `${walletBalance} FRAG` : "N/A"}
+              &gt; Balance: {walletBalance ? `${walletBalance} FRAG` : "N/A"}
             </p>
           </div>
         </div>

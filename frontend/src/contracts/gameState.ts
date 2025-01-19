@@ -1,4 +1,4 @@
-// src/contracts/GameStateContract.ts
+// src/contracts/gameState.ts
 
 import { ethers } from "ethers";
 import gameStateABI from "../abis/ChainsEnd_GameState.json";
@@ -60,16 +60,16 @@ export async function getPlayerInfo() {
 export async function stageCleared() {
   try {
     const contract = gameStateContract;
-    
+
     // Call the stageCleared function
     const tx = await contract.stageCleared();
-    
+
     // Wait for the transaction to be mined
     const receipt = await tx.wait();
 
     return receipt;
   } catch (error) {
-    console.error('Error clearing stage:', error);
+    console.error("Error clearing stage:", error);
     throw error;
   }
 }
@@ -95,19 +95,19 @@ export async function getGameState() {
 export async function createMob(name: string) {
   if (name == "slime") {
     try {
-      const contract = gameStateContract
-    
+      const contract = gameStateContract;
+
       const tx = await contract.createSlime();
       const receipt = await tx.wait();
 
-      const mobCreatedLog = receipt.logs.find(log => 
-        contract.interface.parseLog(log)?.name === 'MobCreated'
+      const mobCreatedLog = receipt.logs.find(
+        (log) => contract.interface.parseLog(log)?.name === "MobCreated"
       );
       const parsedLog = contract.interface.parseLog(mobCreatedLog);
       const mobId = parsedLog.args[0];
-      
+
       const mobInfo = await contract.getMob(mobId);
-      
+
       return {
         id: Number(mobInfo.id),
         name: mobInfo.name,
@@ -116,28 +116,28 @@ export async function createMob(name: string) {
         attack: Number(mobInfo.attack),
         coinsDropped: Number(mobInfo.coinsDropped),
         exists: mobInfo.exists,
-        isDead: mobInfo.isDead
+        isDead: mobInfo.isDead,
       };
     } catch (error) {
-      console.error('Error creating slime mob', error);
+      console.error("Error creating slime mob", error);
       throw error;
     }
   } else if (name == "goblin") {
     try {
-      const contract = gameStateContract
-    
+      const contract = gameStateContract;
+
       const tx = await contract.createGoblin();
-      
+
       const receipt = await tx.wait();
-      
-      const mobCreatedLog = receipt.logs.find(log => 
-        contract.interface.parseLog(log)?.name === 'MobCreated'
+
+      const mobCreatedLog = receipt.logs.find(
+        (log) => contract.interface.parseLog(log)?.name === "MobCreated"
       );
       const parsedLog = contract.interface.parseLog(mobCreatedLog);
       const mobId = parsedLog.args[0];
-      
+
       const mobInfo = await contract.getMob(mobId);
-      
+
       return {
         id: Number(mobInfo.id),
         name: mobInfo.name,
@@ -146,28 +146,28 @@ export async function createMob(name: string) {
         attack: Number(mobInfo.attack),
         coinsDropped: Number(mobInfo.coinsDropped),
         exists: mobInfo.exists,
-        isDead: mobInfo.isDead
+        isDead: mobInfo.isDead,
       };
     } catch (error) {
-      console.error('Error creating goblin mob', error);
+      console.error("Error creating goblin mob", error);
       throw error;
     }
   } else {
     try {
-      const contract = gameStateContract
-    
+      const contract = gameStateContract;
+
       const tx = await contract.createBoss();
-      
+
       const receipt = await tx.wait();
-      
-      const mobCreatedLog = receipt.logs.find(log => 
-        contract.interface.parseLog(log)?.name === 'MobCreated'
+
+      const mobCreatedLog = receipt.logs.find(
+        (log) => contract.interface.parseLog(log)?.name === "MobCreated"
       );
       const parsedLog = contract.interface.parseLog(mobCreatedLog);
       const mobId = parsedLog.args[0];
-      
+
       const mobInfo = await contract.getMob(mobId);
-      
+
       return {
         id: Number(mobInfo.id),
         name: mobInfo.name,
@@ -176,10 +176,10 @@ export async function createMob(name: string) {
         attack: Number(mobInfo.attack),
         coinsDropped: Number(mobInfo.coinsDropped),
         exists: mobInfo.exists,
-        isDead: mobInfo.isDead
+        isDead: mobInfo.isDead,
       };
     } catch (error) {
-      console.error('Error creating boss mob', error);
+      console.error("Error creating boss mob", error);
       throw error;
     }
   }
@@ -187,38 +187,38 @@ export async function createMob(name: string) {
 
 export async function updateMobHealth(mobId: number, damage: number) {
   try {
-    const contract = gameStateContract
+    const contract = gameStateContract;
 
     const tx = await contract.updateMobHealth(mobId, damage);
-    
+
     const receipt = await tx.wait();
-    
+
     return receipt;
   } catch (error) {
-    console.error('Error updating mob health', error);
+    console.error("Error updating mob health", error);
     throw error;
   }
 }
 
 export async function getPlayerCoins() {
   try {
-    const contract = gameStateContract
-    
+    const contract = gameStateContract;
+
     const coins = await contract.getPlayerCoins();
-    
-    return Number(coins)
+
+    return Number(coins);
   } catch (error) {
-    console.error('Error getting player coins', error);
+    console.error("Error getting player coins", error);
     throw error;
   }
 }
 
 export async function getMob(mobId: number) {
   try {
-    const contract = gameStateContract
-    
+    const contract = gameStateContract;
+
     const mob = await contract.getMob(mobId);
-    
+
     return {
       id: Number(mob.id),
       name: mob.name,
@@ -226,10 +226,58 @@ export async function getMob(mobId: number) {
       health: Number(mob.health),
       attack: Number(mob.attack),
       coinsDropped: Number(mob.coinsDropped),
-      exists: mob.exists
+      exists: mob.exists,
     };
   } catch (error) {
-    console.error('Error getting mob', error);
+    console.error("Error getting mob", error);
+    throw error;
+  }
+}
+
+export async function getAllStoreItems() {
+  try {
+    const contract = gameStateContract;
+    // Call getAllStoreItems function from the contract
+    const items = await contract.getAllStoreItems();
+    // Map items to an array of objects with readable formats
+    return items.map((item: any) => ({
+      id: Number(item.id),
+      name: item.name,
+      price: Number(item.price),
+      description: item.description,
+      image: item.image,
+    }));
+  } catch (error) {
+    console.error("Error fetching all store items", error);
+    throw error;
+  }
+}
+
+export async function buyItem(itemId: number) {
+  try {
+    const contract = gameStateContract;
+    const tx = await contract.purchaseItem(itemId);
+    const receipt = await tx.wait();
+    return receipt;
+  } catch (error) {
+    console.error("Error buying item", error);
+    throw error;
+  }
+}
+
+export async function getPlayerItems(playerAddress: string) {
+  try {
+    const contract = gameStateContract;
+    const playerItems = await contract.getPlayerItems(playerAddress);
+    return playerItems.map((item: any) => ({
+      id: Number(item.id),
+      name: item.name,
+      price: Number(item.price),
+      description: item.description,
+      image: item.image,
+    }));
+  } catch (error) {
+    console.error("Error getting player items", error);
     throw error;
   }
 }
