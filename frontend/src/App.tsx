@@ -68,8 +68,8 @@ const App = () => {
         ) : (
           <div className="space-y-6 text-center">
             <p className="text-2xl text-green-400">
-              {gameState?.totalPlayers || "Loading..."} Brave Souls Have Entered
-              the Dungeon
+              {gameState?.totalPlayers || "Loading..."} Brave Soul
+              {gameState?.totalPlayers ? " Has" : "s Have"} Entered the Dungeon
             </p>
             <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4">
               <button
@@ -95,10 +95,10 @@ const App = () => {
       {/* Footer - Wallet Info */}
       <div className="z-10 w-full p-4 bg-gray-800 bg-opacity-80">
         <div className="flex justify-between items-center max-w-4xl mx-auto">
-          <p className="text-yellow-300 font-mono text-sm truncate">
+          <p className="text-yellow-300 font-mono text-md truncate">
             Address: {walletAddress || "Not Connected"}
           </p>
-          <p className="text-yellow-300 font-mono text-sm">
+          <p className="text-yellow-300 font-mono text-md">
             Balance: {walletBalance ? `${walletBalance} FRAG` : "N/A"}
           </p>
         </div>
