@@ -7,7 +7,11 @@ interface WalletData {
   balance: string | null;
 }
 
-function ConnectWallet() {
+interface ConnectWalletProps {
+  onWalletConnect: (address: string) => void;
+}
+
+function ConnectWallet({ onWalletConnect }: ConnectWalletProps) {
   // useState for storing and retrieving wallet details
   const [data, setData] = useState<WalletData>({
     address: "",
@@ -48,6 +52,7 @@ function ConnectWallet() {
       balance: null, // Reset balance while waiting for it to load
     });
 
+    onWalletConnect(account); // Pass wallet address to parent component
     getBalance(account);
   };
 
