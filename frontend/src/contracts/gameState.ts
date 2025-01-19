@@ -4,7 +4,7 @@ import { ethers } from "ethers";
 import gameStateABI from "../abis/ChainsEnd_GameState.json";
 
 // Deployed contract address
-const CONTRACT_ADDRESS = "0xE6E340D132b5f46d1e472DebcD681B2aBc16e57E";
+const CONTRACT_ADDRESS = "0xB0D4afd8879eD9F52b28595d31B441D079B2Ca07";
 
 // Create a provider and signer (assuming MetaMask is used)
 const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545"); // For Hardhat

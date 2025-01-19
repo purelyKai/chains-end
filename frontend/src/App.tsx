@@ -46,10 +46,14 @@ const App = () => {
     };
   }, []);
 
-  const updateWalletInfo = async (address: string) => {
+  const fetchBalance = async () => {
     const balance = await getPlayerCoins();
-    setWalletAddress(address);
     setWalletBalance(balance);
+  };
+
+  const updateWalletInfo = async (address: string) => {
+    fetchBalance();
+    setWalletAddress(address);
   };
 
   if (hasStartedGame) {
@@ -111,12 +115,20 @@ const App = () => {
               &gt; Address: {walletAddress || "Not Connected"}
             </p>
             <p className="text-green-400 text-md">
-              &gt;  Balance: {walletBalance ? `${walletBalance} BLOCK FRAGMENTS` : "N/A"}
+              &gt; Balance:{" "}
+              {walletBalance ? `${walletBalance} BLOCK FRAGMENTS` : "N/A"}
             </p>
           </div>
         </div>
 
-        {isStoreOpen && <Store onClose={() => setIsStoreOpen(false)} />}
+        {isStoreOpen && (
+          <Store
+            onClose={() => {
+              setIsStoreOpen(false);
+              fetchBalance();
+            }}
+          />
+        )}
       </div>
     </>
   );

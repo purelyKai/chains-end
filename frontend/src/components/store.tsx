@@ -22,7 +22,7 @@ const Store = ({ onClose }: StoreProps) => {
   const [selectedItem, setSelectedItem] = useState<StoreItem | null>(null);
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const [gameMessage, setGameMessage] = useState<string | null>(null);
-  const [purchasedItems, setPurchasedItems] = useState<number[]>([]); // Track purchased item IDs
+  const [purchasedItems, setPurchasedItems] = useState<number[]>([]);
   const [allStoreItems, setAllStoreItems] = useState<StoreItem[]>([]);
   const [userAddress, setUserAddress] = useState<string>("");
 
@@ -33,7 +33,10 @@ const Store = ({ onClose }: StoreProps) => {
     const address = accounts[0];
     setUserAddress(address);
   };
-  fetchAddress();
+
+  useEffect(() => {
+    fetchAddress();
+  }, []);
 
   const fetchAllStoreItems = async () => {
     const allItems = await getAllStoreItems();
@@ -41,33 +44,43 @@ const Store = ({ onClose }: StoreProps) => {
   };
 
   const fetchPlayerItems = async () => {
+    if (!userAddress) return;
     const userItems = await getPlayerItems(userAddress);
     setPurchasedItems(userItems);
   };
 
-  // Fetch store items and wallet balance when the component mounts
-  useEffect(() => {
-    const fetchBalance = async () => {
-      const balance = await getPlayerCoins();
-      setWalletBalance(balance);
-    };
+  const fetchBalance = async () => {
+    const balance = await getPlayerCoins();
+    setWalletBalance(balance);
+  };
 
-    fetchBalance();
-    fetchAllStoreItems();
-    fetchPlayerItems();
-  }, []);
-
+  // Fetch store items and wallet balance when the component mounts or address changes
   useEffect(() => {
-    fetchAllStoreItems();
-    fetchPlayerItems();
-  }, [walletBalance]);
+    if (userAddress) {
+      fetchBalance();
+      fetchAllStoreItems();
+      fetchPlayerItems();
+    }
+  }, [userAddress]);
+
+  // Refresh data after balance changes
+  useEffect(() => {
+    if (userAddress && walletBalance !== null) {
+      fetchAllStoreItems();
+      fetchPlayerItems();
+    }
+  }, [walletBalance, userAddress]);
 
   useEffect(() => {
     if (gameMessage) {
-      const timer = setTimeout(() => setGameMessage(null), 2000); // 2   seconds
+      const timer = setTimeout(() => setGameMessage(null), 2000);
       return () => clearTimeout(timer);
     }
   }, [gameMessage]);
+
+  const isItemPurchased = (itemId: number) => {
+    return purchasedItems.includes(itemId);
+  };
 
   // Handle purchase logic
   const handlePurchase = async (item: StoreItem) => {
@@ -76,19 +89,23 @@ const Store = ({ onClose }: StoreProps) => {
       return;
     }
 
-    await purchaseItem(item.id);
+    try {
+      await purchaseItem(item.id);
 
-    // Simulate purchase and update wallet balance
-    const newBalance = walletBalance - item.price;
-    setWalletBalance(newBalance);
+      // Update local state
+      const newBalance = walletBalance - item.price;
+      setWalletBalance(newBalance);
+      setPurchasedItems((prev) => [...prev, item.id]);
 
-    // Set success message
-    setGameMessage(`Successfully purchased ${item.name}!`);
+      setGameMessage(`Successfully purchased ${item.name}!`);
 
-    // Close the modal after 0.5 seconds
-    setTimeout(() => {
-      setSelectedItem(null); // Close the modal
-    }, 500);
+      // Close the modal after 0.5 seconds
+      setTimeout(() => {
+        setSelectedItem(null);
+      }, 500);
+    } catch (error) {
+      setGameMessage("Failed to purchase item. Please try again.");
+    }
   };
 
   return (
@@ -108,37 +125,45 @@ const Store = ({ onClose }: StoreProps) => {
         </div>
         <div className="overflow-x-auto">
           <div className="flex space-x-6 pb-4">
-            {allStoreItems.map((item) => (
-              <div
-                key={item.id}
-                className={`bg-gray-700 rounded-lg p-4 cursor-pointer transition-all ${
-                  purchasedItems.includes(item.id)
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:scale-105"
-                } flex-shrink-0 w-64`}
-                onClick={() =>
-                  !purchasedItems.includes(item.id) && setSelectedItem(item)
-                }
-              >
-                <img
-                  src={item.image || "/placeholder.svg"}
-                  alt={item.name}
-                  className="w-full h-48 object-cover rounded-md mb-4"
-                />
-                <h3 className="text-xl font-semibold text-yellow-400 mb-2">
-                  {item.name}
-                </h3>
-                <p className="text-gray-300 mb-4 h-20 overflow-y-auto">
-                  {item.description}
-                </p>
-                <div className="flex items-center justify-between mt-2">
-                  <p className="text-green-400 font-bold">{item.price} FRAG</p>
-                  {purchasedItems.includes(item.id) && (
-                    <p className="text-red-500 font-bold ml-4">Sold</p>
+            {allStoreItems.map((item) => {
+              const isPurchased = isItemPurchased(item.id);
+              return (
+                <div
+                  key={item.id}
+                  className={`bg-gray-700 rounded-lg p-4 transition-all relative
+                    ${
+                      isPurchased
+                        ? "opacity-75 cursor-not-allowed"
+                        : "hover:scale-105 cursor-pointer"
+                    } flex-shrink-0 w-64`}
+                  onClick={() => !isPurchased && setSelectedItem(item)}
+                >
+                  {isPurchased && (
+                    <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center rounded-lg">
+                      <span className="text-yellow-500 text-2xl font-bold">
+                        OWNED
+                      </span>
+                    </div>
                   )}
+                  <img
+                    src={item.image || "/placeholder.svg"}
+                    alt={item.name}
+                    className="w-full h-48 object-cover rounded-md mb-4"
+                  />
+                  <h3 className="text-xl font-semibold text-yellow-400 mb-2">
+                    {item.name}
+                  </h3>
+                  <p className="text-gray-300 mb-4 h-20 overflow-y-auto">
+                    {item.description}
+                  </p>
+                  <div className="flex items-center justify-between mt-2">
+                    <p className="text-green-400 font-bold">
+                      {item.price} FRAG
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
