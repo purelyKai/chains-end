@@ -57,6 +57,23 @@ export async function getPlayerInfo() {
   }
 }
 
+export async function stageCleared() {
+  try {
+    const contract = gameStateContract;
+    
+    // Call the stageCleared function
+    const tx = await contract.stageCleared();
+    
+    // Wait for the transaction to be mined
+    const receipt = await tx.wait();
+
+    return receipt;
+  } catch (error) {
+    console.error('Error clearing stage:', error);
+    throw error;
+  }
+}
+
 export async function getGameState() {
   try {
     // Get contract instance
@@ -113,7 +130,11 @@ export async function createMob(name: string) {
       
       const receipt = await tx.wait();
       
-      const mobId = receipt.events?.[0]?.args?.[0];
+      const mobCreatedLog = receipt.logs.find(log => 
+        contract.interface.parseLog(log)?.name === 'MobCreated'
+      );
+      const parsedLog = contract.interface.parseLog(mobCreatedLog);
+      const mobId = parsedLog.args[0];
       
       const mobInfo = await contract.getMob(mobId);
       
@@ -128,7 +149,7 @@ export async function createMob(name: string) {
         isDead: mobInfo.isDead
       };
     } catch (error) {
-      console.error('Error creating slime mob', error);
+      console.error('Error creating goblin mob', error);
       throw error;
     }
   } else {
@@ -139,7 +160,11 @@ export async function createMob(name: string) {
       
       const receipt = await tx.wait();
       
-      const mobId = receipt.events?.[0]?.args?.[0];
+      const mobCreatedLog = receipt.logs.find(log => 
+        contract.interface.parseLog(log)?.name === 'MobCreated'
+      );
+      const parsedLog = contract.interface.parseLog(mobCreatedLog);
+      const mobId = parsedLog.args[0];
       
       const mobInfo = await contract.getMob(mobId);
       
@@ -154,7 +179,7 @@ export async function createMob(name: string) {
         isDead: mobInfo.isDead
       };
     } catch (error) {
-      console.error('Error creating slime mob', error);
+      console.error('Error creating boss mob', error);
       throw error;
     }
   }

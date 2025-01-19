@@ -1,5 +1,5 @@
 import Phaser from "phaser"
-import { getPlayerInfo, createMob, updateMobHealth, getPlayerCoins } from "../contracts/gameState";
+import { getPlayerInfo, createMob, updateMobHealth, getPlayerCoins, stageCleared } from "../contracts/gameState";
 
 const PLAYER_HEALTH = 100
 const PLAYER_DMG = 10
@@ -7,6 +7,7 @@ const PLAYER_DMG = 10
 interface MobSprite extends Phaser.Physics.Arcade.Sprite {
   healthBar?: HealthBar;
   isInvulnerable: boolean;
+  isAttacking: boolean;
 }
 
 class HealthBar {
@@ -88,7 +89,7 @@ export class Battle extends Phaser.Scene {
   private player?: Phaser.Physics.Arcade.Sprite
   private playerHealthBar?: HealthBar
   private playerInvulnerable = false;
-  private mobs: (Phaser.Physics.Arcade.Sprite & { healthBar?: HealthBar })[] = []
+  private mobs: MobSprite[] = []
   private PLAYER_SPEED = 300
   private JUMP_VELOCITY = -600
   private isAttacking = false
@@ -97,13 +98,23 @@ export class Battle extends Phaser.Scene {
     this.load.image("background", "/background.png")
     this.load.image("player", "/idle.png")
     this.load.image("slime", "/slime.png")
-    this.load.image("goblin", "/slime.png")
-    this.load.image("boss", "/slime.png")
+    this.load.spritesheet("goblin", "/goblin.png", { frameWidth: 32, frameHeight: 32 })
+    this.load.spritesheet("boss", "/boss.png", { frameWidth: 64, frameHeight: 64 })
     this.load.spritesheet("run", "/run.png", { frameWidth: 32, frameHeight: 40 })
     this.load.spritesheet("attack", "/attack.png", { frameWidth: 50, frameHeight: 40 })
   }
 
   async create() {
+    this.anims.remove("idle")
+    this.anims.remove("run")
+    this.anims.remove("attack")
+    this.anims.remove("goblinIdle")
+    this.anims.remove("goblinRun")
+    this.anims.remove("goblinAttack")
+    this.anims.remove("bossIdle")
+    this.anims.remove("bossRun")
+    this.anims.remove("bossAttack")
+
     if (!this.input?.keyboard) return console.log("you need a keyboard");
 
     const playerState = await getPlayerInfo()
@@ -159,6 +170,66 @@ export class Battle extends Phaser.Scene {
     this.physics.add.existing(platform, true);
     this.physics.add.collider(this.player, platform);
 
+    this.anims.create({
+      key: "idle",
+      frames: [{ key: "player" }],
+      frameRate: 1
+    })
+
+    this.anims.create({
+      key: "run",
+      frames: this.anims.generateFrameNumbers("run", { start: 0, end: 2 }),
+      frameRate: 10
+    })
+
+    this.anims.create({
+      key: "attack",
+      frames: this.anims.generateFrameNumbers("attack", { start: 0, end: 2 }),
+      frameRate: 10,
+    })
+
+    this.anims.create({
+      key: "goblinIdle",
+      frames: this.anims.generateFrameNumbers("goblin", { start: 0, end: 3 }),
+      frameRate: 12,
+      repeat: -1
+    });
+
+    this.anims.create({
+      key: "goblinRun",
+      frames: this.anims.generateFrameNumbers("goblin", { start: 4, end: 11 }),
+      frameRate: 12,
+      repeat: -1
+    });
+
+    this.anims.create({
+      key: "goblinAttack",
+      frames: this.anims.generateFrameNumbers("goblin", { start: 12, end: 17 }),
+      frameRate: 10,
+      repeat: 0 
+    });
+
+    this.anims.create({
+      key: "bossIdle",
+      frames: this.anims.generateFrameNumbers("boss", { start: 0, end: 7 }),
+      frameRate: 12,
+      repeat: -1
+    });
+
+    this.anims.create({
+      key: "bossRun",
+      frames: this.anims.generateFrameNumbers("boss", { start: 8, end: 15 }),
+      frameRate: 12,
+      repeat: -1
+    });
+
+    this.anims.create({
+      key: "bossAttack",
+      frames: this.anims.generateFrameNumbers("boss", { start: 16, end: 20 }),
+      frameRate: 10,
+      repeat: 0 
+    });
+
     let n: number, mobName: string;
     if (playerState.stage == 1) {
       n = 3
@@ -179,9 +250,10 @@ export class Battle extends Phaser.Scene {
         height - 150,
         mobName
       ) as MobSprite;
-
+      mob.setScale(2)
       mob.healthBar = new HealthBar(this, mob, mobData.health);
       mob.isInvulnerable = false
+      mob.isAttacking = false
       
       this.physics.add.collider(mob, leftBoundary);
       this.physics.add.collider(mob, rightBoundary);
@@ -192,6 +264,7 @@ export class Battle extends Phaser.Scene {
         if (!this.player) return
         if (this.isAttacking && !mob.isInvulnerable) {
           mob.isInvulnerable = true
+          mob.isAttacking = false
           const knockbackDirection = this.player.flipX ? -1 : 1;
           const KNOCKBACK_FORCE = 400
 
@@ -202,7 +275,7 @@ export class Battle extends Phaser.Scene {
           this.time.delayedCall(200, () => {
             mob.clearTint();
           });
-          this.time.delayedCall(800, () => {
+          this.time.delayedCall(400, () => {
             mob.isInvulnerable = false
           })
           
@@ -227,13 +300,18 @@ export class Battle extends Phaser.Scene {
             this.handleVictory()
           }
 
-        } else if(!this.playerInvulnerable) {
+        } else if(!this.playerInvulnerable && !mob.isInvulnerable) {
+          mob.isAttacking = true
+          mob.play(mobName+"Attack")
+          mob.once("animationcomplete", () => {
+            mob.isAttacking = false
+          })
           this.playerInvulnerable = true
           const knockbackDirection = mob.flipX ? -1 : 1;
           const KNOCKBACK_FORCE = 400
 
           this.player.setVelocityX(KNOCKBACK_FORCE * knockbackDirection);
-          this.player.setVelocityY(-200)
+          this.player.setVelocityY(500)
 
           this.player.setTint(0xff0000);
           this.time.delayedCall(200, () => {
@@ -247,11 +325,12 @@ export class Battle extends Phaser.Scene {
           if (isDead) {
             this.playerHealthBar?.destroy()
             this.player.destroy()
+            mob.play(mobName+"Idle")
           }
         }
       });
 
-      this.startSlimeJumping(mob);
+      this.startMobMovement(mobName, mob);
     }
 
     const deadZoneWidth = width * 0.6;
@@ -264,28 +343,6 @@ export class Battle extends Phaser.Scene {
       0
     );
     this.cameras.main.setDeadzone(deadZoneWidth, height);
-
-    this.anims.create({
-      key: "idle",
-      frames: [{ key: "player" }],
-      frameRate: 1
-    })
-    this.anims.create({
-      key: "running",
-      frames: this.anims.generateFrameNumbers("run", {
-        start: 0,
-        end: 2
-      }),
-      frameRate: 12
-    })
-    this.anims.create({
-      key: "attacking",
-      frames: this.anims.generateFrameNumbers("attack", {
-        start: 0,
-        end: 2
-      }),
-      frameRate: 12,
-    })
 
     const cursors = this.input.keyboard.addKeys({
       up: Phaser.Input.Keyboard.KeyCodes.W,
@@ -301,13 +358,13 @@ export class Battle extends Phaser.Scene {
         this.player.setVelocityX(-this.PLAYER_SPEED);
         this.player.setFlipX(true)
         if (!this.isAttacking) {
-          this.player.play("running", true);
+          this.player.play("run", true);
         }
       } else if (cursors.right.isDown) {
         this.player.setVelocityX(this.PLAYER_SPEED);
         this.player.setFlipX(false)
         if (!this.isAttacking) {
-          this.player.play("running", true);
+          this.player.play("run", true);
         }
       } else {
         this.player.setVelocityX(0)
@@ -329,19 +386,15 @@ export class Battle extends Phaser.Scene {
         if (this.player.flipX) {
           this.player.body.setSize(originalWidth * 2, 40);
           this.player.body.setOffset(originalOffset - originalWidth, 0);
-          console.log(this.player.body.width, this.player.body.height)
         } else {
           this.player.body.setSize(originalWidth * 2, 40);
           this.player.body.setOffset(originalOffset, 0);
-          console.log(this.player.body.width, this.player.body.height)
         }
 
-        this.player.play("attacking")
+        this.player.play("attack")
         
-        this.player.once
         this.player.once("animationcomplete", () => {
           if (!this.player?.body) return
-          console.log(this.player.body.width, this.player.body.height)
           this.player.body.setSize(20, 40);
           this.player.body.setOffset(0, 0);
           this.isAttacking = false;
@@ -351,40 +404,56 @@ export class Battle extends Phaser.Scene {
     });
   }
 
-  startSlimeJumping(slime: Phaser.Physics.Arcade.Sprite) {
-    const jump = () => {
-      if (!this.player || !slime.body) return;
-      if (slime.body.touching.down) {
-        const directionX = this.player.x - slime.x;
+  startMobMovement(name: string, mob: MobSprite) {
+    if (name == "slime") {
+      const jump = () => {
+        if (!this.player || !mob.body) return;
+        if (mob.body.touching.down) {
+          const directionX = this.player.x - mob.x;
+          const normalizedDirection = Math.sign(directionX);
+          const willJumpTowardsPlayer = Math.random() < 0.60;
+          const finalDirection = willJumpTowardsPlayer 
+            ? normalizedDirection
+            : Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
+          const velocityX = finalDirection * Phaser.Math.Between(200, 300);
+          const velocityY = Phaser.Math.Between(-550, -650);
+          
+          mob.setVelocityX(velocityX);
+          mob.setVelocityY(velocityY);
+
+          const checkLanding = () => {
+            if (!mob.body) return
+            if (mob.body.touching.down) {
+              mob.setVelocityX(0);
+              this.events.removeListener("update", checkLanding);
+            }
+          };
+          this.events.on("update", checkLanding);
+        }
+
+        this.time.delayedCall(
+          Phaser.Math.Between(1000, 3000),
+          () => jump(),
+          [],
+          this
+        );
+      };
+      jump();
+    } else {
+      this.events.on("update", ()=> {
+        if (!this.player || !mob.body) return;
+        const directionX = this.player.x - mob.x;
         const normalizedDirection = Math.sign(directionX);
-        const willJumpTowardsPlayer = Math.random() < 0.60;
-        const finalDirection = willJumpTowardsPlayer 
-          ? normalizedDirection
-          : Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
-        const velocityX = finalDirection * Phaser.Math.Between(200, 300);
-        const velocityY = Phaser.Math.Between(-550, -650);
-        
-        slime.setVelocityX(velocityX);
-        slime.setVelocityY(velocityY);
-
-        const checkLanding = () => {
-          if (!slime.body) return
-          if (slime.body.touching.down) {
-            slime.setVelocityX(0);
-            this.events.removeListener("update", checkLanding);
-          }
-        };
-        this.events.on("update", checkLanding);
-      }
-
-      this.time.delayedCall(
-        Phaser.Math.Between(1000, 3000),
-        () => jump(),
-        [],
-        this
-      );
-    };
-    jump();
+        if (normalizedDirection < 0) {
+          mob.setFlipX(true)
+        } else {
+          mob.setFlipX(false)
+        }
+        const velocityX = normalizedDirection * 100;
+        mob.setVelocityX(velocityX);
+        mob.play(name+"Run", true)
+      })
+    }
   }
 
   async handleVictory() {
@@ -393,7 +462,7 @@ export class Battle extends Phaser.Scene {
     const camera = this.cameras.main;
     const { width, height } = camera;
   
-    this.add.text(width/2, height/2 - 100, "VICTORY!", {
+    const victoryText = this.add.text(width/2, height/2 - 100, "VICTORY!", {
       fontFamily: "VP-Pixel",
       fontSize: "64px",
       color: "#ffffff",
@@ -403,7 +472,7 @@ export class Battle extends Phaser.Scene {
     .setScrollFactor(0)
     .setDepth(1000);
 
-    const restartButton = this.add.text(width/2, height/2 + 50, "Continue", {
+    const continueButton = this.add.text(width/2, height/2 + 50, "Continue", {
       fontFamily: "VP-Pixel",
       fontSize: "32px",
       color: "#000000",
@@ -414,16 +483,20 @@ export class Battle extends Phaser.Scene {
     .setScrollFactor(0)
     .setDepth(1000);
   
-    restartButton.setInteractive()
-    restartButton.on("pointerdown", () => {
-      this.scene.start("Battle");
+    continueButton.setInteractive()
+    continueButton.on("pointerdown", async() => {
+      victoryText.destroy();
+      continueButton.destroy();
+      const result = await stageCleared()
+      console.log("res", result)
+      this.scene.restart();
     });
   
-    restartButton.on("pointerover", () => {
-      restartButton.setScale(1.1);
+    continueButton.on("pointerover", () => {
+      continueButton.setScale(1.1);
     });
-    restartButton.on("pointerout", () => {
-      restartButton.setScale(1);
+    continueButton.on("pointerout", () => {
+      continueButton.setScale(1);
     });
   }
 }

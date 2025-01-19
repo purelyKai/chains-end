@@ -51,6 +51,7 @@ contract GameStateManager {
   event PlayerCreated(address indexed playerAddress, uint256 initialStage, uint256 initialLevel, uint256 initialHealth);
   event PlayerLeveledUp(address indexed playerAddress, uint256 newLevel);
   event PlayerHealthUpdated(address indexed playerAddress, uint256 newHealth);
+  event PlayerStageCleared(address indexed playerAddresses, uint256 newStage);
   event MobCreated(uint256 indexed mobId, string name, EnemyType enemyType, uint256 health, uint256 attack, uint256 coinsDropped);
   
   modifier playerExists(address _playerAddress) {
@@ -92,6 +93,12 @@ contract GameStateManager {
     players[msg.sender].health = 100;
 
     emit PlayerLeveledUp(msg.sender, players[msg.sender].level);
+  }
+
+  function stageCleared() public playerExists(msg.sender) {
+    players[msg.sender].stage++;
+
+    emit PlayerStageCleared(msg.sender, players[msg.sender].stage);
   }
   
   function updateHealth(uint256 _newHealth) public playerExists(msg.sender) {
