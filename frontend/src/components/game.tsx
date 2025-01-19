@@ -2,8 +2,12 @@ import React, { useEffect } from "react";
 import Phaser from "phaser";
 import { Battle } from "../scenes/battle";
 
-export const Game: React.FC = () => {
-    useEffect(() => {
+type GameProps = {
+  playerAddr: string;
+}
+
+export const Game: React.FC<GameProps> = ({ playerAddr }) => {
+    useEffect(() => { 
       const config: Phaser.Types.Core.GameConfig = {
         type: Phaser.AUTO,
         parent: "game-container",
@@ -20,11 +24,18 @@ export const Game: React.FC = () => {
             debug: false
           }
         },
-        scene: [Battle]
+        scene: [Battle],
+        callbacks:  {
+          preBoot: game => {
+            game.registry.merge({
+              playerAddr
+            })
+          }
+        }
       };
 
       const game = new Phaser.Game(config);
-
+      
       return () => {
         game.destroy(true);
       };

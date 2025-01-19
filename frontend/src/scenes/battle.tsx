@@ -1,4 +1,5 @@
 import Phaser from "phaser"
+import { getPlayerInfo } from "../contracts/gameState";
 
 const PLAYER_HEALTH = 100
 const PLAYER_DMG = 10
@@ -101,8 +102,12 @@ export class Battle extends Phaser.Scene {
     this.load.spritesheet("attack", "/attack.png", { frameWidth: 50, frameHeight: 40 })
   }
 
-  create() {
+  async create() {
     if (!this.input?.keyboard) return console.log("you need a keyboard");
+
+    const playerAddr = this.registry.get("playerAddr")
+    const data = await getPlayerInfo()
+    console.log("DATA", data)
 
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;

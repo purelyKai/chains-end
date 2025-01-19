@@ -5,120 +5,73 @@ import { PlayerState, WorldState } from "../types/types";
 import gameStateABI from "../abis/ChainsEnd_GameState.json";
 
 // Deployed contract address
-const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
 // Create a provider and signer (assuming MetaMask is used)
 const provider = new ethers.JsonRpcProvider("http://127.0.0.1:8545"); // For Hardhat
 // const provider = new ethers.Web3Provider(window.ethereum);
 const signer = await provider.getSigner();
 const gameStateContract = new ethers.Contract(
-  contractAddress,
+  CONTRACT_ADDRESS,
   gameStateABI.abi,
   signer
 );
 
-// Function to join the game
-export const joinGame = async (): Promise<void> => {
+export async function createPlayer() {
   try {
-    const tx = await gameStateContract.joinGame();
-    await tx.wait(); // Wait for transaction to be mined
-    console.log("Player joined the game!");
+    // Get contract instance
+    const contract = gameStateContract
+    
+    // Call create player function
+    const tx = await contract.createPlayer();
+    
+    // Wait for transaction to be mined
+    const receipt = await tx.wait();
+    
+    return receipt;
   } catch (error) {
-    console.error("Error joining the game:", error);
-    throw error; // Optionally rethrow the error if the caller needs to handle it
+    console.error('Error creating player', error);
+    throw error;
   }
-};
+}
 
-// Function to get world state
-export const getWorldState = async (): Promise<WorldState> => {
+export async function getPlayerInfo() {
   try {
-    const worldState = await gameStateContract.getWorldState();
-    console.log("World State:", worldState);
-
-    // Assuming `worldState` is an array or object from Solidity that matches `WorldState` interface
+    // Get contract instance
+    const contract = gameStateContract
+    
+    // Call get player info function
+    const playerInfo = await contract.getPlayerInfo();
+    
+    // Convert BigNumber to regular numbers
     return {
-      currentRound: worldState.round.toNumber(), // BigNumber conversion
-      totalPlayers: worldState.numPlayers.toNumber(),
-      isPaused: worldState.isPaused,
+      stage: Number(playerInfo.stage),
+      level: Number(playerInfo.level),
+      experience: Number(playerInfo.experience),
+      health: Number(playerInfo.health),
+      createdAt: new Date(Number(playerInfo.createdAt)),
+      exists: playerInfo.exists
     };
   } catch (error) {
-    console.error("Error getting world state:", error);
-    throw error; // Optionally rethrow the error if the caller needs to handle it
+    console.error('Error getting player info', error);
+    throw error;
   }
-};
+}
 
-// Function to get player state
-export const getPlayerState = async (
-  playerAddress: string
-): Promise<PlayerState> => {
+export async function getGameState() {
   try {
-    const playerState = await gameStateContract.getPlayerState(playerAddress);
-    console.log("Player State:", playerState);
+    // Get contract instance
+    const contract = gameStateContract
+    
+    // Call get game state function
+    const gameState = await contract.getGameState();
 
+    // Convert BigNumber to regular number
     return {
-      level: playerState.level.toNumber(), // BigNumber conversion
-      experience: playerState.exp.toNumber(),
-      isActive: playerState.isActive,
-      lastPlayTime: playerState.lastPlayTime.toNumber(),
+      totalPlayers: Number(gameState.totalPlayers),
     };
   } catch (error) {
-    console.error("Error getting player state:", error);
-    throw error; // Optionally rethrow the error if the caller needs to handle it
-  }
-};
-
-// Function to update player state
-export const updatePlayerState = async (
-  newLevel: number,
-  newExp: number
-): Promise<void> => {
-  try {
-    const tx = await gameStateContract.updatePlayerState(newLevel, newExp);
-    await tx.wait(); // Wait for transaction to be mined
-    console.log(
-      `Player state updated: level ${newLevel}, experience ${newExp}`
-    );
-  } catch (error) {
-    console.error("Error updating player state:", error);
+    console.error('Error getting game state', error);
     throw error;
   }
-};
-
-// Function to update world state
-export const updateWorldState = async (
-  newRound: number,
-  isPaused: boolean
-): Promise<void> => {
-  try {
-    const tx = await gameStateContract.updateWorldState(newRound, isPaused);
-    await tx.wait(); // Wait for transaction to be mined
-    console.log(`World state updated: round ${newRound}, paused ${isPaused}`);
-  } catch (error) {
-    console.error("Error updating world state:", error);
-    throw error;
-  }
-};
-
-// Function to rejoin the game (if player left and wants to come back)
-export const rejoinGame = async (): Promise<void> => {
-  try {
-    const tx = await gameStateContract.rejoinGame();
-    await tx.wait(); // Wait for transaction to be mined
-    console.log("Player rejoined the game!");
-  } catch (error) {
-    console.error("Error rejoining the game:", error);
-    throw error;
-  }
-};
-
-// Function to leave the game
-export const leaveGame = async (): Promise<void> => {
-  try {
-    const tx = await gameStateContract.leaveGame();
-    await tx.wait(); // Wait for transaction to be mined
-    console.log("Player left the game!");
-  } catch (error) {
-    console.error("Error leaving the game:", error);
-    throw error;
-  }
-};
+}
